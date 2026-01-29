@@ -1,0 +1,203 @@
+<!-- wp:html -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --primary: #c8f56b;
+  --dark: #09090b;
+  --card: #18181b;
+  --border: rgba(255,255,255,0.08);
+  --text: rgba(255,255,255,0.7);
+  --text-muted: rgba(255,255,255,0.4);
+}
+
+* { font-family: 'Inter', -apple-system, sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
+
+.lux-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; background: rgba(9,9,11,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.lux-logo { font-size: 0.9rem; font-weight: 600; color: #fff; text-decoration: none; letter-spacing: 0.1em; }
+.lux-nav-links { display: flex; align-items: center; gap: 35px; }
+.lux-nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; transition: color 0.3s; }
+.lux-nav-links a:hover { color: #fff; }
+.lux-nav-links a.active { color: var(--primary); }
+.lux-btn { display: inline-flex; align-items: center; background: var(--primary); color: #000; font-weight: 600; font-size: 0.75rem; padding: 12px 24px; border-radius: 6px; text-decoration: none; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; }
+.lux-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(200,245,107,0.2); }
+
+.page-hero { min-height: 70vh; background: var(--dark); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 140px 50px 80px; position: relative; overflow: hidden; }
+.page-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at center, rgba(200,245,107,0.08) 0%, transparent 70%); pointer-events: none; }
+
+.lux-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary); margin-bottom: 12px; }
+.page-title { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; color: #fff; margin: 0 0 20px 0; max-width: 800px; }
+.page-subtitle { font-size: 1.2rem; line-height: 1.7; color: var(--text); max-width: 600px; }
+
+.content-section { background: var(--dark); padding: 80px 50px; border-top: 1px solid var(--border); }
+.content-narrow { max-width: 700px; margin: 0 auto; }
+
+.section-title { font-size: 1.8rem; font-weight: 700; color: #fff; margin: 0 0 24px 0; }
+.section-text { font-size: 1.05rem; line-height: 1.9; color: var(--text); margin-bottom: 24px; }
+.section-text:last-child { margin-bottom: 0; }
+
+.quote-block { background: var(--card); border-left: 4px solid var(--primary); padding: 30px 40px; margin: 40px 0; border-radius: 0 12px 12px 0; }
+.quote-text { font-size: 1.3rem; font-weight: 500; color: #fff; line-height: 1.6; font-style: italic; margin: 0 0 16px 0; }
+.quote-author { font-size: 0.85rem; color: var(--primary); font-weight: 600; }
+
+.value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1000px; margin: 40px auto 0; }
+.value-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 40px 30px; text-align: center; transition: all 0.3s; }
+.value-card:hover { border-color: rgba(200,245,107,0.3); transform: translateY(-4px); }
+.value-icon { width: 60px; height: 60px; background: rgba(200,245,107,0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.2rem; color: var(--primary); margin: 0 auto 20px; }
+.value-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0 0 12px 0; }
+.value-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin: 0; }
+
+.pillar-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 1000px; margin: 0 auto; }
+.pillar { padding: 40px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; }
+.pillar-num { font-size: 3rem; font-weight: 800; color: var(--primary); font-family: 'JetBrains Mono', monospace; margin-bottom: 16px; opacity: 0.5; }
+.pillar-title { font-size: 1.3rem; font-weight: 700; color: #fff; margin: 0 0 16px 0; }
+.pillar-text { font-size: 0.95rem; color: var(--text); line-height: 1.7; margin: 0; }
+
+.cta-section { background: linear-gradient(135deg, #111 0%, #1a2a1a 100%); padding: 100px 50px; text-align: center; border-top: 1px solid var(--border); }
+.cta-title { font-size: 2.5rem; font-weight: 700; color: #fff; margin: 0 0 16px 0; }
+.cta-text { font-size: 1.1rem; color: var(--text); margin: 0 auto 30px; max-width: 500px; }
+
+.lux-footer { background: #050505; padding: 30px 50px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+.lux-footer a { color: var(--text-muted); text-decoration: none; margin-left: 24px; }
+
+@media (max-width: 968px) {
+  .lux-nav { padding: 15px 20px; }
+  .lux-nav-links a:not(.lux-btn) { display: none; }
+  .page-hero { padding: 120px 20px 60px; min-height: auto; }
+  .content-section { padding: 60px 20px; }
+  .value-grid { grid-template-columns: 1fr; }
+  .pillar-section { grid-template-columns: 1fr; gap: 24px; }
+  .cta-section { padding: 60px 20px; }
+  .lux-footer { flex-direction: column; gap: 15px; text-align: center; }
+}
+</style>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<nav class="lux-nav">
+  <a href="home.html" class="lux-logo">AMINAURA</a>
+  <div class="lux-nav-links">
+    <a href="residential.html">Residential</a>
+    <a href="commercial.html">Commercial</a>
+    <a href="mission.html" class="active">Mission</a>
+    <a href="home.html#join" class="lux-btn">Apply Now</a>
+  </div>
+</nav>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<section class="page-hero">
+  <p class="lux-label">Our Mission</p>
+  <h1 class="page-title">Building Wealth While Building a Better World</h1>
+  <p class="page-subtitle">We exist to prove that doing good and doing well are not mutually exclusive. You can help families, grow personally, and build real wealth - all at once.</p>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<section class="content-section">
+  <div class="content-narrow">
+    <p class="lux-label">The Why</p>
+    <h2 class="section-title">Why Aminaura Exists</h2>
+    <p class="section-text">Most people are stuck. Stuck in jobs that pay just enough to survive. Stuck trading hours for dollars with no path to freedom. Stuck watching others win while wondering why they cannot.</p>
+    <p class="section-text">Aminaura was built to break that cycle.</p>
+    <p class="section-text">We created a system where anyone - regardless of background, education, or experience - can learn high-value skills, help real people, and earn income that actually changes their life.</p>
+    
+    <div class="quote-block">
+      <p class="quote-text">"We do not just sell solar. We build people who build wealth."</p>
+      <span class="quote-author">- Aminaura Core Philosophy</span>
+    </div>
+  </div>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<section class="content-section" style="background:#0d0d0d;">
+  <div class="content-narrow" style="text-align:center;">
+    <p class="lux-label">What We Stand For</p>
+    <h2 class="section-title">Our Values</h2>
+  </div>
+  <div class="value-grid">
+    <div class="value-card">
+      <div class="value-icon">01</div>
+      <h3 class="value-title">Results Over Excuses</h3>
+      <p class="value-text">We focus on what works. No politics, no drama - just performance and outcomes that matter.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-icon">02</div>
+      <h3 class="value-title">Growth Mindset</h3>
+      <p class="value-text">Every setback is a setup. We learn constantly, adapt quickly, and never stop improving.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-icon">03</div>
+      <h3 class="value-title">Win-Win or No Deal</h3>
+      <p class="value-text">If the customer does not win, we do not win. We only offer solutions that genuinely help.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-icon">04</div>
+      <h3 class="value-title">Speed of Execution</h3>
+      <p class="value-text">Ideas are cheap. Execution is everything. We move fast, learn faster, and iterate constantly.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-icon">05</div>
+      <h3 class="value-title">Relentless Drive</h3>
+      <p class="value-text">Average effort gets average results. We push past comfortable to reach exceptional.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-icon">06</div>
+      <h3 class="value-title">Impact Over Income</h3>
+      <p class="value-text">Money follows value. Focus on helping people and the earnings will come.</p>
+    </div>
+  </div>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<section class="content-section">
+  <div class="content-narrow" style="text-align:center;margin-bottom:50px;">
+    <p class="lux-label">The Vision</p>
+    <h2 class="section-title">Four Pillars of Growth</h2>
+  </div>
+  <div class="pillar-section">
+    <div class="pillar">
+      <div class="pillar-num">01</div>
+      <h3 class="pillar-title">Financial Freedom</h3>
+      <p class="pillar-text">Earn what you are worth, not what someone else decides you are worth. Our commission structure is designed for wealth-building, not just bill-paying. Top performers earn six figures.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">02</div>
+      <h3 class="pillar-title">Personal Development</h3>
+      <p class="pillar-text">Sales is the ultimate personal growth vehicle. Every door you knock, every objection you handle, every deal you close - you become stronger, more confident, more capable.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">03</div>
+      <h3 class="pillar-title">Positive Impact</h3>
+      <p class="pillar-text">Every signup puts money back in a family's pocket and supports clean energy expansion. You are not selling - you are solving a problem. That is a career you can be proud of.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">04</div>
+      <h3 class="pillar-title">AI-Amplified Results</h3>
+      <p class="pillar-text">We use cutting-edge AI tools to make you more effective - smarter lead targeting, faster training, automated systems. You focus on what humans do best: connecting with people.</p>
+    </div>
+  </div>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<section class="cta-section">
+  <p class="lux-label">Join The Movement</p>
+  <h2 class="cta-title">This Is Your Opportunity</h2>
+  <p class="cta-text">Stop waiting for permission. Stop hoping something will change. Take action. Join a team that is going somewhere - and take yourself with it.</p>
+  <a href="home.html#join" class="lux-btn">Apply Now</a>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<footer class="lux-footer">
+  <div>2026 Aminaura LLC</div>
+  <div>
+    <a href="mailto:info@aminauragroup.com">Contact</a>
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+  </div>
+</footer>
+<!-- /wp:html -->
