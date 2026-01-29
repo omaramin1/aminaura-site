@@ -23,16 +23,6 @@
 .mono { font-family: 'JetBrains Mono', monospace; }
 .serif { font-family: 'Playfair Display', Georgia, serif; }
 
-/* Utility */
-.strikethrough {
-  text-decoration: line-through;
-  opacity: 0.5;
-}
-
-.highlight {
-  background: linear-gradient(180deg, transparent 60%, rgba(200,245,107,0.3) 60%);
-}
-
 /* Nav */
 .lux-nav {
   position: fixed;
@@ -117,6 +107,19 @@
   font-size: 0.75rem;
 }
 
+/* Urgency Bar */
+.urgency-bar {
+  background: linear-gradient(90deg, var(--danger), #dc2626);
+  padding: 12px 20px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+
+.urgency-bar strong { font-weight: 800; }
+
 /* Hero */
 .lux-hero {
   min-height: 100vh;
@@ -126,7 +129,7 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 120px 50px 80px;
+  padding: 140px 50px 80px;
   position: relative;
   overflow: hidden;
 }
@@ -150,15 +153,15 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: transparent;
-  border: 1px solid var(--primary);
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
   padding: 10px 20px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
   font-weight: 500;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--primary);
+  color: #ef4444;
   margin-bottom: 30px;
 }
 
@@ -174,113 +177,67 @@
 
 .lux-title {
   font-family: 'Inter', sans-serif;
-  font-size: clamp(3rem, 8vw, 7rem);
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
   font-weight: 900;
-  line-height: 0.95;
+  line-height: 1.0;
   letter-spacing: -0.04em;
   color: #fff;
-  margin: 0 0 20px 0;
+  margin: 0 0 24px 0;
   text-transform: uppercase;
 }
 
-.lux-title .serif-word {
-  font-family: 'Playfair Display', serif;
-  font-weight: 400;
-  font-style: italic;
-  text-transform: none;
-  color: var(--primary);
-}
+.lux-title .lime { color: var(--primary); }
 
 .lux-subtitle {
-  font-size: 1rem;
-  line-height: 1.8;
+  font-size: 1.1rem;
+  line-height: 1.7;
   color: var(--text);
-  margin: 0 auto 40px;
-  max-width: 500px;
+  margin: 0 auto 16px;
+  max-width: 580px;
   font-weight: 400;
+}
+
+.hero-guarantee {
+  font-size: 0.8rem;
+  color: var(--primary);
+  margin-bottom: 32px;
+  font-weight: 600;
 }
 
 .lux-ctas {
   display: flex;
   gap: 16px;
   justify-content: center;
-  margin-bottom: 60px;
+  margin-bottom: 50px;
 }
 
-/* Quote Block */
-.quote-block {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 80px 40px;
-  position: relative;
-}
-
-.quote-marks {
-  font-family: 'Playfair Display', serif;
-  font-size: 12rem;
-  color: var(--primary);
-  opacity: 0.1;
-  position: absolute;
-  top: 20px;
-  left: 0;
-  line-height: 1;
-}
-
-.quote-text {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
-  font-style: italic;
-  font-weight: 400;
-  line-height: 1.4;
-  color: #fff;
-  position: relative;
-  z-index: 1;
-}
-
-.quote-text strong {
-  font-family: 'Inter', sans-serif;
-  font-style: normal;
-  font-weight: 800;
-  color: var(--primary);
-  text-transform: uppercase;
-  font-size: 0.9em;
-}
-
-.quote-credit {
+/* Social Proof Bar */
+.social-proof-bar {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 30px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.quote-credit::before {
-  content: '';
-  width: 40px;
-  height: 2px;
-  background: var(--primary);
-}
-
-/* Section Divider */
-.section-divider {
-  display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 30px 50px;
-  gap: 30px;
+  gap: 40px;
+  padding: 24px 0;
   border-top: 1px solid var(--border);
+  max-width: 700px;
+  margin: 0 auto;
 }
 
-.section-divider span {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
+.proof-item {
+  text-align: center;
+}
+
+.proof-num {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.proof-label {
+  font-size: 0.65rem;
   color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 /* Sections */
@@ -311,25 +268,16 @@
 
 .lux-heading {
   font-family: 'Inter', sans-serif;
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-size: clamp(1.8rem, 4vw, 3rem);
   font-weight: 800;
   color: #fff;
   line-height: 1.1;
   margin: 0 0 24px 0;
   text-transform: uppercase;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 }
 
-.lux-heading .italic {
-  font-family: 'Playfair Display', serif;
-  font-weight: 400;
-  font-style: italic;
-  text-transform: none;
-}
-
-.lux-heading .lime {
-  color: var(--primary);
-}
+.lux-heading .lime { color: var(--primary); }
 
 .lux-text {
   font-size: 1rem;
@@ -338,167 +286,227 @@
   font-weight: 400;
 }
 
-/* Philosophy Cards */
-.philosophy-grid {
+/* Problem Section */
+.problem-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  max-width: 1100px;
-  margin: 60px auto 0;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  max-width: 800px;
+  margin: 40px auto 0;
 }
 
-.philosophy-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  padding: 40px 30px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s;
+.problem-card {
+  background: rgba(239,68,68,0.05);
+  border: 1px solid rgba(239,68,68,0.15);
+  padding: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
 }
 
-.philosophy-card:hover {
-  border-color: var(--primary);
-  transform: translateY(-4px);
+.problem-card::before {
+  content: '✕';
+  color: var(--danger);
+  font-weight: 700;
+  font-size: 1rem;
 }
 
-.philosophy-card::before {
-  content: attr(data-num);
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  color: var(--text-muted);
-  letter-spacing: 0.1em;
-}
-
-.philosophy-card h3 {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #fff;
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.philosophy-card p {
+.problem-card p {
   font-size: 0.9rem;
   color: var(--text);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
-.philosophy-card .card-icon {
-  font-size: 2rem;
+/* This Is For Section */
+.for-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  max-width: 900px;
+  margin: 40px auto 0;
+}
+
+.for-column h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   margin-bottom: 20px;
-  filter: grayscale(1) brightness(1.5);
+  padding-bottom: 12px;
+  border-bottom: 2px solid;
 }
 
-/* Big Statement */
-.big-statement {
-  padding: 120px 50px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
+.for-column.yes h3 { color: var(--primary); border-color: var(--primary); }
+.for-column.no h3 { color: var(--danger); border-color: var(--danger); }
+
+.for-column ul {
+  list-style: none;
 }
 
-.big-statement::before {
-  content: attr(data-bg);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: 'Inter', sans-serif;
-  font-size: 15vw;
-  font-weight: 900;
-  color: rgba(255,255,255,0.02);
-  letter-spacing: -0.05em;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-.big-statement h2 {
-  font-family: 'Inter', sans-serif;
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  font-weight: 300;
+.for-column li {
+  font-size: 0.9rem;
   color: var(--text);
-  line-height: 1.4;
-  max-width: 800px;
-  margin: 0 auto;
+  padding: 10px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.for-column.yes li::before { content: '✓'; color: var(--primary); font-weight: 700; }
+.for-column.no li::before { content: '✕'; color: var(--danger); font-weight: 700; }
+
+/* Testimonials */
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+  max-width: 1000px;
+  margin: 40px auto 0;
+}
+
+.testimonial-large {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 40px;
+  position: relative;
+}
+
+.testimonial-large::before {
+  content: '"';
+  font-family: 'Playfair Display', serif;
+  font-size: 8rem;
+  color: var(--primary);
+  opacity: 0.1;
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  line-height: 1;
+}
+
+.testimonial-large .testimonial-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-style: italic;
+  color: #fff;
+  line-height: 1.5;
+  margin-bottom: 24px;
   position: relative;
   z-index: 1;
 }
 
-.big-statement h2 strong {
-  font-weight: 900;
-  color: #fff;
-  text-transform: uppercase;
+.testimonial-small-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.big-statement h2 em {
-  font-family: 'Playfair Display', serif;
+.testimonial-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 24px;
+}
+
+.testimonial-text {
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 12px;
   font-style: italic;
+}
+
+.testimonial-author {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.testimonial-role {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.earnings-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 16px;
+  max-width: 900px;
+  margin: 30px auto 0;
+}
+
+.earnings-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 20px;
+  text-align: center;
+}
+
+.earnings-card .amount {
+  font-size: 1.6rem;
+  font-weight: 900;
   color: var(--primary);
+}
+
+.earnings-card .name {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
 }
 
 /* Value Stack */
 .value-stack {
   background: var(--card);
   border: 1px solid var(--border);
-  padding: 50px;
+  padding: 40px;
   max-width: 700px;
-  margin: 50px auto 0;
+  margin: 40px auto 0;
   position: relative;
 }
 
 .value-stack::before {
-  content: 'TEAM COST';
+  content: 'WHAT YOU\'D PAY';
   position: absolute;
   top: -12px;
   left: 30px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.2em;
   color: var(--dark);
   background: var(--primary);
-  padding: 6px 14px;
+  padding: 6px 12px;
 }
 
 .value-row {
   display: flex;
   justify-content: space-between;
-  padding: 14px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--border);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .value-row:last-child { border: none; }
-
-.value-role { 
-  color: var(--text); 
-  font-weight: 400;
-}
-
+.value-role { color: var(--text); }
 .value-cost { 
   font-family: 'JetBrains Mono', monospace;
   color: var(--text-muted);
   text-decoration: line-through;
-  font-size: 0.85rem;
 }
 
 .value-total {
   display: flex;
   justify-content: space-between;
-  padding: 28px 0 0;
-  margin-top: 20px;
+  padding: 20px 0 0;
+  margin-top: 16px;
   border-top: 3px solid var(--primary);
 }
 
 .value-total .value-role { 
   color: #fff;
   font-weight: 800;
-  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -506,7 +514,7 @@
 .value-total .value-cost { 
   color: var(--danger);
   text-decoration: line-through;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 700;
 }
 
@@ -522,7 +530,7 @@
 .pricing-card {
   background: var(--card);
   border: 1px solid var(--border);
-  padding: 45px 35px;
+  padding: 40px 30px;
   position: relative;
   transition: all 0.4s ease;
 }
@@ -540,70 +548,64 @@
 .pricing-badge {
   position: absolute;
   top: 0;
-  right: 30px;
+  right: 24px;
   background: var(--primary);
   color: #000;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   font-weight: 700;
-  padding: 8px 14px;
+  padding: 8px 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .pricing-name {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 700;
   color: var(--primary);
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .pricing-price {
   font-family: 'Inter', sans-serif;
-  font-size: 3.5rem;
+  font-size: 3rem;
   font-weight: 900;
   color: #fff;
   margin-bottom: 4px;
   letter-spacing: -0.03em;
 }
 
-.pricing-price span {
-  font-size: 1rem;
-  color: var(--text-muted);
-  font-weight: 400;
-}
-
 .pricing-orig {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   text-decoration: line-through;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .pricing-desc {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text);
-  margin-bottom: 28px;
-  line-height: 1.7;
+  margin-bottom: 24px;
+  line-height: 1.6;
 }
 
 .pricing-features {
   list-style: none;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .pricing-features li {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text);
-  padding: 12px 0;
+  padding: 10px 0;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .pricing-features li:last-child { border: none; }
@@ -619,85 +621,63 @@
   justify-content: center;
 }
 
-/* Testimonials */
-.testimonial-grid {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 20px;
-  max-width: 1000px;
-  margin: 60px auto 0;
-}
-
-.testimonial-large {
-  background: var(--card);
-  border: 1px solid var(--border);
-  padding: 50px;
-  position: relative;
-}
-
-.testimonial-large::before {
-  content: '"';
-  font-family: 'Playfair Display', serif;
-  font-size: 10rem;
-  color: var(--primary);
-  opacity: 0.1;
-  position: absolute;
-  top: 10px;
-  left: 30px;
-  line-height: 1;
-}
-
-.testimonial-large .testimonial-text {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
-  font-style: italic;
-  color: #fff;
-  line-height: 1.5;
-  margin-bottom: 30px;
-  position: relative;
-  z-index: 1;
-}
-
-.testimonial-small-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.testimonial-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  padding: 28px;
-}
-
-.testimonial-text {
-  font-size: 0.95rem;
-  color: var(--text);
-  line-height: 1.7;
-  margin-bottom: 16px;
-  font-style: italic;
-}
-
-.testimonial-author {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #fff;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.testimonial-role {
+.pricing-note {
   font-size: 0.7rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--primary);
+  margin-top: 12px;
+  text-align: center;
 }
+
+/* Guarantee */
+.guarantee-box {
+  border: 2px solid var(--primary);
+  padding: 50px 40px;
+  max-width: 750px;
+  margin: 50px auto 0;
+  text-align: center;
+  position: relative;
+  background: rgba(200,245,107,0.03);
+}
+
+.guarantee-box::before {
+  content: '🛡️';
+  font-size: 2.5rem;
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--dark);
+  padding: 0 16px;
+}
+
+/* Scarcity Box */
+.scarcity-box {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.25);
+  padding: 24px 32px;
+  max-width: 600px;
+  margin: 40px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.scarcity-box .icon { font-size: 1.5rem; }
+
+.scarcity-box p {
+  font-size: 0.9rem;
+  color: #fff;
+  font-weight: 500;
+}
+
+.scarcity-box strong { color: var(--danger); }
 
 /* EMG Section */
 .emg-section {
   background: var(--card);
   border: 2px solid rgba(200,245,107,0.2);
-  padding: 70px 60px;
+  padding: 60px 50px;
   max-width: 900px;
   margin: 0 auto;
   text-align: center;
@@ -711,95 +691,63 @@
   left: 50%;
   transform: translateX(-50%);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.2em;
   color: #000;
   background: var(--primary);
-  padding: 8px 20px;
+  padding: 8px 16px;
 }
 
 .emg-steps {
   display: grid;
   grid-template-columns: repeat(3,1fr);
-  gap: 20px;
-  margin: 40px 0;
+  gap: 16px;
+  margin: 30px 0;
 }
 
 .emg-step {
   background: rgba(255,255,255,0.03);
   border: 1px solid var(--border);
-  padding: 30px 20px;
+  padding: 24px 16px;
 }
 
 .emg-step-num {
   font-family: 'Inter', sans-serif;
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 900;
   color: var(--primary);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .emg-step-text {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
 
-/* Guarantee */
-.guarantee-box {
-  border: 2px solid var(--border);
-  padding: 60px 50px;
-  max-width: 700px;
-  margin: 60px auto 0;
-  text-align: center;
-  position: relative;
-}
-
-.guarantee-box::before {
-  content: 'GUARANTEE';
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: var(--primary);
-  background: var(--dark);
-  padding: 0 20px;
-}
-
 /* FAQ */
 .faq-container {
   max-width: 700px;
-  margin: 50px auto 0;
+  margin: 40px auto 0;
 }
 
 .faq-item {
   border-bottom: 1px solid var(--border);
-  overflow: hidden;
 }
 
-.faq-item:first-child {
-  border-top: 1px solid var(--border);
-}
+.faq-item:first-child { border-top: 1px solid var(--border); }
 
 .faq-question {
-  padding: 28px 0;
-  font-family: 'Inter', sans-serif;
-  font-size: 1rem;
+  padding: 24px 0;
+  font-size: 0.95rem;
   font-weight: 600;
   color: #fff;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: color 0.3s;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
 }
 
 .faq-question:hover { color: var(--primary); }
@@ -807,14 +755,13 @@
 .faq-question::after {
   content: '+';
   font-family: 'JetBrains Mono', monospace;
-  font-size: 1.5rem;
-  font-weight: 400;
+  font-size: 1.3rem;
   color: var(--primary);
 }
 
 .faq-answer {
-  padding: 0 0 28px 0;
-  font-size: 0.95rem;
+  padding: 0 0 24px 0;
+  font-size: 0.9rem;
   color: var(--text);
   line-height: 1.8;
   display: none;
@@ -826,7 +773,7 @@
 /* CTA Section */
 .lux-cta-section {
   background: var(--dark);
-  padding: 140px 50px;
+  padding: 120px 50px;
   text-align: center;
   border-top: 1px solid var(--border);
   position: relative;
@@ -840,17 +787,16 @@
   left: 50%;
   transform: translate(-50%, -50%);
   font-family: 'Inter', sans-serif;
-  font-size: 30vw;
+  font-size: 25vw;
   font-weight: 900;
   color: rgba(255,255,255,0.015);
-  letter-spacing: -0.05em;
   pointer-events: none;
 }
 
 /* Footer */
 .lux-footer {
   background: #000;
-  padding: 40px 50px;
+  padding: 30px 50px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -864,47 +810,96 @@
 .lux-footer a {
   color: var(--text-muted);
   text-decoration: none;
-  margin-left: 30px;
-  transition: color 0.2s;
+  margin-left: 24px;
 }
 
 .lux-footer a:hover { color: #fff; }
 
+/* Exit Popup */
+.exit-popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+}
+
+.exit-popup.show { display: flex; }
+
+.exit-popup-content {
+  background: var(--card);
+  border: 2px solid var(--primary);
+  padding: 50px;
+  max-width: 500px;
+  text-align: center;
+  position: relative;
+}
+
+.exit-popup-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.exit-popup input {
+  width: 100%;
+  padding: 16px;
+  margin: 16px 0;
+  background: var(--dark);
+  border: 1px solid var(--border);
+  color: #fff;
+  font-size: 1rem;
+}
+
 /* Mobile */
 @media (max-width: 968px) {
   .lux-nav { padding: 15px 20px; }
-  .lux-nav-links { gap: 20px; }
   .lux-nav-links a:not(.lux-btn) { display: none; }
-  .lux-hero { padding: 100px 20px 60px; }
-  .lux-title { font-size: clamp(2.5rem, 12vw, 5rem); }
+  .lux-hero { padding: 120px 20px 60px; }
+  .lux-title { font-size: clamp(2rem, 10vw, 4rem); }
   .lux-ctas { flex-direction: column; gap: 12px; }
   .lux-btn { width: 100%; justify-content: center; }
-  .lux-section { padding: 80px 20px; }
-  .philosophy-grid { grid-template-columns: 1fr; }
+  .lux-section { padding: 70px 20px; }
+  .problem-grid { grid-template-columns: 1fr; }
+  .for-grid { grid-template-columns: 1fr; }
   .pricing-grid { grid-template-columns: 1fr; }
   .testimonial-grid { grid-template-columns: 1fr; }
+  .earnings-grid { grid-template-columns: repeat(2, 1fr); }
   .emg-steps { grid-template-columns: 1fr; }
-  .lux-footer { flex-direction: column; gap: 20px; text-align: center; }
-  .quote-block { padding: 60px 20px; }
-  .big-statement { padding: 80px 20px; }
+  .social-proof-bar { flex-wrap: wrap; gap: 24px; }
+  .lux-footer { flex-direction: column; gap: 16px; text-align: center; }
 }
 
 @media (max-width: 480px) {
-  .lux-nav { padding: 12px 16px; }
-  .lux-hero { padding: 80px 16px 40px; }
-  .lux-section { padding: 60px 16px; }
-  .emg-section { padding: 50px 24px; }
-  .pricing-card { padding: 35px 25px; }
-  .value-stack { padding: 35px 25px; }
+  .lux-hero { padding: 100px 16px 40px; }
+  .lux-section { padding: 50px 16px; }
+  .emg-section { padding: 40px 20px; }
+  .pricing-card { padding: 30px 20px; }
 }
 </style>
 <!-- /wp:html -->
 
 <!-- wp:html -->
+<div class="urgency-bar">
+  ⚡ <strong>Founder Pricing Ends Feb 15th</strong> — All tiers increase 50%. Only <strong>7 Architect spots</strong> left this quarter.
+</div>
+<!-- /wp:html -->
+
+<!-- wp:html -->
 <nav class="lux-nav">
-  <a href="home.html" class="lux-logo">Aminaura</a>
+  <a href="#" class="lux-logo">Aminaura</a>
   <div class="lux-nav-links">
-    <a href="#method">Method</a>
+    <a href="#results">Results</a>
     <a href="#pricing">Pricing</a>
     <a href="#emg">Earn Access</a>
     <a href="#pricing" class="lux-btn">Get In</a>
@@ -915,57 +910,27 @@
 <!-- wp:html -->
 <section class="lux-hero">
   <div style="max-width:900px;position:relative;z-index:1;">
-    <div class="hero-tag">The Aminaura Method — Est. 2026</div>
-    <h1 class="lux-title">Convert<br><span class="serif-word">Aura</span><br>To Capital.</h1>
-    <p class="lux-subtitle">Your presence is currency. Your energy is equity. Stop trading time — start stacking leverage.</p>
+    <div class="hero-tag">Only 7 Architect Spots Left</div>
+    <h1 class="lux-title">Replace Your <span class="lime">$780K Team</span><br>With One AI.</h1>
+    <p class="lux-subtitle">Architect OS is a 24/7 AI executive team that handles research, sales, marketing, ops, and strategy — so you can stop managing people and start scaling.</p>
+    <p class="hero-guarantee">✓ 30-day guarantee: Save 20+ hours/week or full refund</p>
     <div class="lux-ctas">
-      <a href="#pricing" class="lux-btn lux-btn-large">Enter →</a>
-      <a href="#method" class="lux-btn lux-btn-ghost lux-btn-large">Learn The Method</a>
-    </div>
-  </div>
-</section>
-<!-- /wp:html -->
-
-<!-- wp:html -->
-<div class="section-divider">
-  <span>Philosophy</span>
-</div>
-<!-- /wp:html -->
-
-<!-- wp:html -->
-<section class="lux-section" style="border-top:none;">
-  <div class="quote-block">
-    <div class="quote-marks">"</div>
-    <p class="quote-text">The goal isn't to be busy. The goal is to be <strong>magnetic</strong> — and let the right things pull toward you.</p>
-    <div class="quote-credit">The Aminaura Principle</div>
-  </div>
-</section>
-<!-- /wp:html -->
-
-<!-- wp:html -->
-<section class="lux-section" id="method">
-  <div style="max-width:1000px;margin:0 auto;">
-    <div style="text-align:center;margin-bottom:60px;">
-      <p class="lux-label" style="justify-content:center;">The Framework</p>
-      <h2 class="lux-heading">Aura Can't Be Taught.<br>But It Can Be <span class="lime">Architected.</span></h2>
-      <p class="lux-text" style="max-width:600px;margin:0 auto;">Everyone has presence. Few know how to deploy it. The Aminaura Method turns intangible magnetism into tangible wealth — powered by AI that runs while you rest.</p>
+      <a href="#pricing" class="lux-btn lux-btn-large">See Pricing →</a>
+      <a href="#results" class="lux-btn lux-btn-ghost lux-btn-large">See Results First</a>
     </div>
     
-    <div class="philosophy-grid">
-      <div class="philosophy-card" data-num="01">
-        <div class="card-icon">◐</div>
-        <h3>Attract</h3>
-        <p>Master the art of drawing opportunities, people, and capital toward you — without chasing.</p>
+    <div class="social-proof-bar">
+      <div class="proof-item">
+        <div class="proof-num">847+</div>
+        <div class="proof-label">Operators Enrolled</div>
       </div>
-      <div class="philosophy-card" data-num="02">
-        <div class="card-icon">◈</div>
-        <h3>Architect</h3>
-        <p>Build systems that multiply your presence across time and space. Work once. Earn forever.</p>
+      <div class="proof-item">
+        <div class="proof-num">$2.4M</div>
+        <div class="proof-label">Earned by Members</div>
       </div>
-      <div class="philosophy-card" data-num="03">
-        <div class="card-icon">◉</div>
-        <h3>Accumulate</h3>
-        <p>Stack capital while AI compounds your efforts 24/7. Your aura becomes an appreciating asset.</p>
+      <div class="proof-item">
+        <div class="proof-num">24/7</div>
+        <div class="proof-label">AI Working For You</div>
       </div>
     </div>
   </div>
@@ -973,62 +938,24 @@
 <!-- /wp:html -->
 
 <!-- wp:html -->
-<section class="big-statement" data-bg="LEVERAGE">
-  <h2>The difference between the <strong>wealthy</strong> and the busy is simple: one builds <em>machines,</em> the other becomes one.</h2>
-</section>
-<!-- /wp:html -->
-
-<!-- wp:html -->
-<section class="lux-section" id="architect">
+<section class="lux-section">
   <div style="max-width:900px;margin:0 auto;text-align:center;">
-    <p class="lux-label" style="justify-content:center;">The Machine</p>
-    <h2 class="lux-heading">Introducing<br><span class="lime">Architect OS</span></h2>
-    <p class="lux-text" style="max-width:600px;margin:0 auto;">The operating system that runs your empire while you sleep. A 24/7 AI executive team handling research, sales, marketing, operations, and strategy — so your energy stays where it compounds most.</p>
+    <p class="lux-label" style="justify-content:center;">The Problem</p>
+    <h2 class="lux-heading">You're Drowning in Work<br>That <span class="lime">Shouldn't Be Yours</span></h2>
+    <p class="lux-text" style="max-width:600px;margin:0 auto;">Sound familiar?</p>
     
-    <div class="value-stack">
-      <div class="value-row">
-        <span class="value-role">Research Analyst</span>
-        <span class="value-cost">$5,500/mo</span>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <p>Spending hours on tasks that don't move the needle — research, admin, content, emails</p>
       </div>
-      <div class="value-row">
-        <span class="value-role">Sales Development</span>
-        <span class="value-cost">$5,500/mo</span>
+      <div class="problem-card">
+        <p>Hiring is expensive, slow, and you end up managing instead of building</p>
       </div>
-      <div class="value-row">
-        <span class="value-role">Copywriter</span>
-        <span class="value-cost">$4,500/mo</span>
+      <div class="problem-card">
+        <p>VAs and freelancers need constant hand-holding and still miss deadlines</p>
       </div>
-      <div class="value-row">
-        <span class="value-role">Social Media Manager</span>
-        <span class="value-cost">$3,500/mo</span>
-      </div>
-      <div class="value-row">
-        <span class="value-role">Operations Manager</span>
-        <span class="value-cost">$6,500/mo</span>
-      </div>
-      <div class="value-row">
-        <span class="value-role">Data Analyst</span>
-        <span class="value-cost">$6,500/mo</span>
-      </div>
-      <div class="value-row">
-        <span class="value-role">Project Manager</span>
-        <span class="value-cost">$6,500/mo</span>
-      </div>
-      <div class="value-row">
-        <span class="value-role">Executive Assistant</span>
-        <span class="value-cost">$4,000/mo</span>
-      </div>
-      <div class="value-row">
-        <span class="value-role">Web Developer</span>
-        <span class="value-cost">$7,500/mo</span>
-      </div>
-      <div class="value-row">
-        <span class="value-role">Business Strategist</span>
-        <span class="value-cost">$10,000/mo</span>
-      </div>
-      <div class="value-total">
-        <span class="value-role">Annual Team Cost</span>
-        <span class="value-cost">$780,000</span>
+      <div class="problem-card">
+        <p>You know AI can help but don't have time to figure it out yourself</p>
       </div>
     </div>
   </div>
@@ -1036,57 +963,107 @@
 <!-- /wp:html -->
 
 <!-- wp:html -->
-<section class="lux-section">
-  <div class="quote-block">
-    <div class="quote-marks">"</div>
-    <p class="quote-text">Money follows attention. Attention follows <strong>aura.</strong> Master the source.</p>
-    <div class="quote-credit">On Sequence</div>
-  </div>
-</section>
-<!-- /wp:html -->
-
-<!-- wp:html -->
-<section class="lux-section">
+<section class="lux-section" id="results">
   <div style="max-width:1000px;margin:0 auto;text-align:center;">
-    <p class="lux-label" style="justify-content:center;">Real Talk</p>
-    <h2 class="lux-heading">From The <span class="lime">Field</span></h2>
+    <p class="lux-label" style="justify-content:center;">Proof</p>
+    <h2 class="lux-heading">Real Results From <span class="lime">Real Operators</span></h2>
     
     <div class="testimonial-grid">
       <div class="testimonial-large">
-        <p class="testimonial-text">"$25,000 in my first 5 weeks. No prior sales experience. Just showed up, followed the system, and let the method work."</p>
+        <p class="testimonial-text">"$25,000 in my first 5 weeks. No prior sales experience. Followed the system, let the method work."</p>
         <p class="testimonial-author">Yusuf K.</p>
         <p class="testimonial-role">EMG Top Performer — Virginia</p>
       </div>
       <div class="testimonial-small-grid">
         <div class="testimonial-card">
-          <p class="testimonial-text">"Made $18k in 6 weeks while still learning. On pace for $80k+ this year. This changed my whole trajectory."</p>
+          <p class="testimonial-text">"$18k in 6 weeks while still learning. On pace for $80k+ this year."</p>
           <p class="testimonial-author">Syed N.</p>
           <p class="testimonial-role">EMG Rep — Mid-Atlantic</p>
         </div>
         <div class="testimonial-card">
-          <p class="testimonial-text">"$22k in my first 2 months. Came in broke, left with a plan. EMG gave me the vehicle, I just drove it."</p>
+          <p class="testimonial-text">"$22k in my first 2 months. Came in broke, left with a plan."</p>
           <p class="testimonial-author">Jamar J.</p>
           <p class="testimonial-role">EMG Rep — Virginia</p>
         </div>
       </div>
     </div>
     
-    <div style="margin-top:40px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:900px;margin-left:auto;margin-right:auto;">
-      <div style="background:var(--card);border:1px solid var(--border);padding:24px;text-align:center;">
-        <div style="font-size:1.8rem;font-weight:900;color:var(--primary);">$72K</div>
-        <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">Derrick G. — Year 1</div>
+    <div class="earnings-grid">
+      <div class="earnings-card">
+        <div class="amount">$72K</div>
+        <div class="name">Derrick G. — Year 1</div>
       </div>
-      <div style="background:var(--card);border:1px solid var(--border);padding:24px;text-align:center;">
-        <div style="font-size:1.8rem;font-weight:900;color:var(--primary);">$48K</div>
-        <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">Giavanna A. — 8 Months</div>
+      <div class="earnings-card">
+        <div class="amount">$48K</div>
+        <div class="name">Giavanna A. — 8 Mo</div>
       </div>
-      <div style="background:var(--card);border:1px solid var(--border);padding:24px;text-align:center;">
-        <div style="font-size:1.8rem;font-weight:900;color:var(--primary);">$35K</div>
-        <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">Tyler D. — 6 Months</div>
+      <div class="earnings-card">
+        <div class="amount">$35K</div>
+        <div class="name">Tyler D. — 6 Mo</div>
       </div>
-      <div style="background:var(--card);border:1px solid var(--border);padding:24px;text-align:center;">
-        <div style="font-size:1.8rem;font-weight:900;color:var(--primary);">$28K</div>
-        <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;">Zaytije M. — 5 Months</div>
+      <div class="earnings-card">
+        <div class="amount">$28K</div>
+        <div class="name">Zaytije M. — 5 Mo</div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<section class="lux-section">
+  <div style="max-width:900px;margin:0 auto;text-align:center;">
+    <p class="lux-label" style="justify-content:center;">The Math</p>
+    <h2 class="lux-heading">What This Team Would <span class="lime">Actually Cost</span></h2>
+    
+    <div class="value-stack">
+      <div class="value-row"><span class="value-role">Research Analyst</span><span class="value-cost">$5,500/mo</span></div>
+      <div class="value-row"><span class="value-role">Sales Development Rep</span><span class="value-cost">$5,500/mo</span></div>
+      <div class="value-row"><span class="value-role">Copywriter</span><span class="value-cost">$4,500/mo</span></div>
+      <div class="value-row"><span class="value-role">Social Media Manager</span><span class="value-cost">$3,500/mo</span></div>
+      <div class="value-row"><span class="value-role">Operations Manager</span><span class="value-cost">$6,500/mo</span></div>
+      <div class="value-row"><span class="value-role">Data Analyst</span><span class="value-cost">$6,500/mo</span></div>
+      <div class="value-row"><span class="value-role">Project Manager</span><span class="value-cost">$6,500/mo</span></div>
+      <div class="value-row"><span class="value-role">Executive Assistant</span><span class="value-cost">$4,000/mo</span></div>
+      <div class="value-row"><span class="value-role">Web Developer</span><span class="value-cost">$7,500/mo</span></div>
+      <div class="value-row"><span class="value-role">Business Strategist</span><span class="value-cost">$10,000/mo</span></div>
+      <div class="value-total">
+        <span class="value-role">Annual Cost</span>
+        <span class="value-cost">$780,000</span>
+      </div>
+    </div>
+    
+    <p style="margin-top:30px;font-size:1.1rem;color:#fff;font-weight:600;">Your investment: <span style="color:var(--primary);font-size:1.3rem;">One-time $2,997 - $9,997</span></p>
+  </div>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<section class="lux-section">
+  <div style="max-width:900px;margin:0 auto;text-align:center;">
+    <p class="lux-label" style="justify-content:center;">Fit Check</p>
+    <h2 class="lux-heading">Is This <span class="lime">For You?</span></h2>
+    
+    <div class="for-grid">
+      <div class="for-column yes">
+        <h3>This is for you if:</h3>
+        <ul>
+          <li>You're building something and need leverage fast</li>
+          <li>You're tired of hiring, training, and managing people</li>
+          <li>You want to move like a 10-person team — solo</li>
+          <li>You're ready to invest in systems, not salaries</li>
+          <li>You take action and want results, not theory</li>
+        </ul>
+      </div>
+      <div class="for-column no">
+        <h3>This is NOT for you if:</h3>
+        <ul>
+          <li>You're looking for get-rich-quick schemes</li>
+          <li>You won't put in the work to implement</li>
+          <li>You expect magic without execution</li>
+          <li>You're not willing to learn new systems</li>
+          <li>You need hand-holding for every decision</li>
+        </ul>
       </div>
     </div>
   </div>
@@ -1097,73 +1074,73 @@
 <section class="lux-section" id="pricing">
   <div style="max-width:1200px;margin:0 auto;text-align:center;">
     <p class="lux-label" style="justify-content:center;">Investment</p>
-    <h2 class="lux-heading">Pick Your <span class="lime">Level</span></h2>
-    <p class="lux-text" style="max-width:500px;margin:0 auto 50px;">One-time. Lifetime access. No monthly. No per-seat. The higher you go, the more your aura compounds.</p>
+    <h2 class="lux-heading">Choose Your <span class="lime">Level</span></h2>
+    <p class="lux-text" style="max-width:550px;margin:0 auto 40px;">One-time investment. Lifetime access. No monthly fees.</p>
     
     <div class="pricing-grid">
-      <!-- Blueprint Tier -->
+      <!-- Blueprint -->
       <div class="pricing-card">
         <p class="pricing-name">Blueprint</p>
         <p class="pricing-price">$497</p>
         <p class="pricing-orig">$997</p>
-        <p class="pricing-desc">The foundation. Everything you need to understand and start implementing.</p>
+        <p class="pricing-desc">The foundation. Learn the method and start implementing.</p>
         <ul class="pricing-features">
           <li>The Aminaura Method (full system)</li>
           <li>AI prompt library — 150+ templates</li>
-          <li>Business automation playbooks</li>
+          <li>Automation playbooks</li>
           <li>SOP frameworks</li>
           <li>Community access</li>
         </ul>
         <a href="#" class="lux-btn lux-btn-ghost">Start Here</a>
+        <p class="pricing-note">↑ Credits toward Operator if you upgrade within 30 days</p>
       </div>
       
-      <!-- Operator Tier -->
+      <!-- Operator -->
       <div class="pricing-card featured">
-        <span class="pricing-badge">Most Chosen</span>
+        <span class="pricing-badge">Most Popular</span>
         <p class="pricing-name">Operator</p>
         <p class="pricing-price">$2,997</p>
         <p class="pricing-orig">$4,997</p>
-        <p class="pricing-desc">The complete system. AI assistant access plus guided implementation.</p>
+        <p class="pricing-desc">Full AI assistant + done-with-you implementation.</p>
         <ul class="pricing-features">
           <li>Everything in Blueprint</li>
-          <li>AI Assistant (business hours)</li>
-          <li>30-day kickstart call</li>
-          <li>Weekly strategy drops</li>
-          <li>Priority community</li>
-          <li>Quarterly group intensive</li>
+          <li>Full AI assistant (unlimited)</li>
+          <li>30-day rapid deployment</li>
+          <li>3 custom AI workflows built for you</li>
+          <li>Weekly office hours</li>
+          <li>Priority support</li>
         </ul>
         <a href="#" class="lux-btn">Become Operator →</a>
       </div>
       
-      <!-- Architect Tier -->
+      <!-- Architect -->
       <div class="pricing-card">
         <p class="pricing-name">Architect</p>
         <p class="pricing-price">$9,997</p>
         <p class="pricing-orig">$14,997</p>
-        <p class="pricing-desc">The full executive layer. 24/7 AI + direct founder access.</p>
+        <p class="pricing-desc">Full 24/7 AI layer + direct founder access.</p>
         <ul class="pricing-features">
           <li>Everything in Operator</li>
-          <li>Full 24/7 AI (unlimited)</li>
-          <li>Custom automation builds</li>
-          <li>Direct founder access</li>
-          <li>Done-for-you setup</li>
-          <li>Quarterly 1:1 strategy</li>
+          <li>5 custom AI builds for your business</li>
+          <li>Direct founder access (async + calls)</li>
+          <li>Done-for-you system setup</li>
+          <li>Quarterly 1:1 strategy sessions</li>
+          <li>Lifetime priority everything</li>
         </ul>
-        <a href="#" class="lux-btn lux-btn-ghost">Apply</a>
+        <a href="#" class="lux-btn lux-btn-ghost">Apply (7 spots)</a>
       </div>
     </div>
     
     <div class="guarantee-box">
-      <h3 class="lux-heading" style="font-size:1.8rem;margin-bottom:16px;">30 Days. <span class="lime">No Risk.</span></h3>
-      <p class="lux-text" style="max-width:480px;margin:0 auto;">Implement it. If you don't see clear ROI within 30 days, get every penny back. No forms. No attitude. We only win when you do.</p>
+      <h3 class="lux-heading" style="font-size:1.6rem;margin-bottom:16px;">The <span class="lime">20-Hour Guarantee</span></h3>
+      <p class="lux-text" style="max-width:500px;margin:0 auto;">Use Architect OS for 30 days. If you don't save at least 20 hours per week on tasks, get a full refund. No forms. No hassle. We only win when you do.</p>
+    </div>
+    
+    <div class="scarcity-box">
+      <span class="icon">⚡</span>
+      <p><strong>Founder pricing ends Feb 15th.</strong> After that, all tiers increase by 50%.</p>
     </div>
   </div>
-</section>
-<!-- /wp:html -->
-
-<!-- wp:html -->
-<section class="big-statement" data-bg="HUSTLE">
-  <h2>No capital? <strong>No problem.</strong> We take <em>sweat equity.</em></h2>
 </section>
 <!-- /wp:html -->
 
@@ -1171,8 +1148,8 @@
 <section class="lux-section" id="emg">
   <div style="max-width:900px;margin:0 auto;">
     <div class="emg-section">
-      <h2 class="lux-heading" style="margin-bottom:16px;">Earn Your <span class="lime">Way In.</span></h2>
-      <p class="lux-text" style="max-width:520px;margin:0 auto;">The Aminaura Method isn't just for people with money — it's for people with energy. Join EMG, put your aura to work in the field, and unlock the system when you prove yourself.</p>
+      <h2 class="lux-heading" style="margin-bottom:16px;">No Capital? <span class="lime">Earn Your Way In.</span></h2>
+      <p class="lux-text" style="max-width:520px;margin:0 auto;">Join EMG, put your energy to work in the field, and unlock Operator tier free when you hit $5K in earnings.</p>
       
       <div class="emg-steps">
         <div class="emg-step">
@@ -1185,12 +1162,12 @@
         </div>
         <div class="emg-step">
           <div class="emg-step-num">03</div>
-          <div class="emg-step-text">Unlock Operator</div>
+          <div class="emg-step-text">Unlock Operator Free</div>
         </div>
       </div>
       
       <a href="mailto:join@emgteam.com" class="lux-btn lux-btn-large">Apply to EMG →</a>
-      <p style="font-size:0.75rem;color:var(--text-muted);margin-top:20px;text-transform:uppercase;letter-spacing:0.1em;">Convert hustle into access.</p>
+      <p style="font-size:0.7rem;color:var(--text-muted);margin-top:16px;text-transform:uppercase;letter-spacing:0.1em;">No experience needed. Sweat equity accepted.</p>
     </div>
   </div>
 </section>
@@ -1204,28 +1181,24 @@
     
     <div class="faq-container">
       <div class="faq-item open">
-        <div class="faq-question">Is this real AI or templates?</div>
-        <div class="faq-answer">Real, live AI — not ChatGPT prompts. You get access to a custom-configured assistant trained on business ops, sales, marketing, and strategy. It executes tasks, not just suggests them. Works 24/7, learns your business.</div>
+        <div class="faq-question">Is this real AI or just templates?</div>
+        <div class="faq-answer">Real AI — not ChatGPT prompts. You get a custom-configured AI assistant trained on business ops, sales, marketing, and strategy. It executes tasks, not just suggests them. Works 24/7 and learns your business.</div>
       </div>
-      
       <div class="faq-item">
         <div class="faq-question">What if I'm not technical?</div>
-        <div class="faq-answer">Perfect. Built for operators, not engineers. If you can text, you can use this. Plain English. No code. No setup headaches.</div>
+        <div class="faq-answer">Perfect. Built for operators, not engineers. If you can text, you can use this. Plain English. No code.</div>
       </div>
-      
       <div class="faq-item">
         <div class="faq-question">How is this different from hiring?</div>
-        <div class="faq-answer">Employees sleep, call in sick, need training, management, benefits, make mistakes. Architect OS runs 24/7, never forgets, improves over time, costs a fraction of one hire — let alone a team.</div>
+        <div class="faq-answer">Employees sleep, call in sick, need training, management, and benefits. Architect OS runs 24/7, never forgets, improves over time, and costs a fraction of one hire.</div>
       </div>
-      
       <div class="faq-item">
         <div class="faq-question">What's the EMG path?</div>
-        <div class="faq-answer">EMG is our field team helping families save on energy costs. Real money, real work. Hit $5k earnings and Operator tier is yours — free. We reward energy with access.</div>
+        <div class="faq-answer">EMG is our field team helping families save on energy. Real money, real work. Hit $5k in earnings and Operator tier is yours — free.</div>
       </div>
-      
       <div class="faq-item">
-        <div class="faq-question">What if it doesn't work for me?</div>
-        <div class="faq-answer">You get your money back. 30-day guarantee means you implement, test, see results — or refund. If you don't win, we don't deserve your investment.</div>
+        <div class="faq-question">What if it doesn't work?</div>
+        <div class="faq-answer">You get your money back. Our 20-Hour Guarantee means if you don't save 20+ hours/week within 30 days, full refund. No questions.</div>
       </div>
     </div>
   </div>
@@ -1236,10 +1209,10 @@
 <section class="lux-cta-section">
   <div style="position:relative;z-index:1;">
     <p class="lux-label" style="justify-content:center;">Decision Time</p>
-    <h2 class="lux-heading" style="max-width:700px;margin:0 auto 24px;">Your Aura Is Already<br>Generating Value.<br><span class="lime">Start Collecting.</span></h2>
-    <p class="lux-text" style="max-width:450px;margin:0 auto 40px;">Every day without systems, your energy leaks. Architect OS captures it, compounds it, converts it — 24/7.</p>
-    <a href="#pricing" class="lux-btn lux-btn-large">Enter The Method →</a>
-    <p style="font-size:0.7rem;color:var(--text-muted);margin-top:24px;text-transform:uppercase;letter-spacing:0.15em;">Only 7 Architect spots remain this quarter.</p>
+    <h2 class="lux-heading" style="max-width:700px;margin:0 auto 24px;">Stop Paying $780K/Year<br>For Work AI Does <span class="lime">Better.</span></h2>
+    <p class="lux-text" style="max-width:480px;margin:0 auto 32px;">Every week without leverage is money left on the table. One investment. Lifetime access. 30-day guarantee.</p>
+    <a href="#pricing" class="lux-btn lux-btn-large">Get Architect OS Now →</a>
+    <p style="font-size:0.7rem;color:var(--text-muted);margin-top:20px;text-transform:uppercase;letter-spacing:0.1em;">Only 7 Architect spots left. Founder pricing ends Feb 15.</p>
   </div>
 </section>
 <!-- /wp:html -->
@@ -1256,11 +1229,44 @@
 <!-- /wp:html -->
 
 <!-- wp:html -->
+<div class="exit-popup" id="exitPopup">
+  <div class="exit-popup-content">
+    <button class="exit-popup-close" onclick="closePopup()">×</button>
+    <h3 style="font-size:1.3rem;font-weight:800;color:#fff;margin-bottom:8px;text-transform:uppercase;">Wait — Free AI Audit</h3>
+    <p style="font-size:0.9rem;color:var(--text);margin-bottom:16px;">See what a $780K team could do for YOUR business. Get a free 10-minute AI opportunity audit.</p>
+    <input type="email" placeholder="Enter your email" id="exitEmail">
+    <button class="lux-btn" style="width:100%;justify-content:center;" onclick="submitEmail()">Get Free Audit →</button>
+    <p style="font-size:0.7rem;color:var(--text-muted);margin-top:12px;">No spam. Just value.</p>
+  </div>
+</div>
+<!-- /wp:html -->
+
+<!-- wp:html -->
 <script>
+// FAQ
 document.querySelectorAll('.faq-question').forEach(q => {
-  q.addEventListener('click', () => {
-    q.parentElement.classList.toggle('open');
-  });
+  q.addEventListener('click', () => q.parentElement.classList.toggle('open'));
 });
+
+// Exit intent
+let popupShown = false;
+document.addEventListener('mouseout', (e) => {
+  if (e.clientY < 10 && !popupShown) {
+    document.getElementById('exitPopup').classList.add('show');
+    popupShown = true;
+  }
+});
+
+function closePopup() {
+  document.getElementById('exitPopup').classList.remove('show');
+}
+
+function submitEmail() {
+  const email = document.getElementById('exitEmail').value;
+  if (email) {
+    alert('Thanks! Check your inbox for your free AI audit.');
+    closePopup();
+  }
+}
 </script>
 <!-- /wp:html -->
