@@ -897,7 +897,7 @@
 
 <!-- wp:html -->
 <nav class="lux-nav">
-  <a href="/" class="lux-logo">Aminaura</a>
+  <a href="#" class="lux-logo">Aminaura</a>
   <div class="lux-nav-links">
     <a href="#results">Results</a>
     <a href="#pricing">Pricing</a>
@@ -1110,7 +1110,7 @@
           <li>SOP frameworks</li>
           <li>Community access</li>
         </ul>
-        <a href="#architect-os" class="lux-btn lux-btn-ghost">Start Here</a>
+        <a href="#" class="lux-btn lux-btn-ghost">Start Here</a>
         <p class="pricing-note">↑ Credits toward Operator if you upgrade within 30 days</p>
       </div>
       
@@ -1129,7 +1129,7 @@
           <li>Weekly office hours</li>
           <li>Priority support</li>
         </ul>
-        <a href="#pricing" class="lux-btn">Become Operator →</a>
+        <a href="#" class="lux-btn">Become Operator →</a>
       </div>
       
       <!-- Architect -->
@@ -1146,7 +1146,7 @@
           <li>Quarterly 1:1 strategy sessions</li>
           <li>Lifetime priority everything</li>
         </ul>
-        <a href="mailto:omar.amin.jem@gmail.com?subject=Architect%20OS%20Application" class="lux-btn lux-btn-ghost">Apply (7 spots)</a>
+        <a href="#" class="lux-btn lux-btn-ghost">Apply (7 spots)</a>
       </div>
     </div>
     
@@ -1241,8 +1241,8 @@
   <div>© 2026 Aminaura</div>
   <div>
     <a href="mailto:hello@aminaura.com">Contact</a>
-    <a href="privacy.html">Privacy</a>
-    <a href="terms.html">Terms</a>
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
   </div>
 </footer>
 <!-- /wp:html -->
@@ -1289,7 +1289,3 @@ function submitEmail() {
 }
 </script>
 <!-- /wp:html -->
-<!-- Google Analytics 4 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
-<script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag("js", new Date());gtag("config", "GA_MEASUREMENT_ID");</script>
-<!-- SUPER TEAM CONVERSION ELEMENTS -->
