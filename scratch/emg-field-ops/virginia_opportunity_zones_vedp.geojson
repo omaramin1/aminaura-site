@@ -1,0 +1,69 @@
+{
+  "type": "FeatureCollection",
+  "name": "virginia_opportunity_zones",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "GEOID": "51760000100",
+        "TRACT_NAME": "Census Tract 1",
+        "COUNTY": "Richmond City",
+        "DESIGNATED": "2018-06-14"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-77.5, 37.5],
+          [-77.5, 37.6],
+          [-77.4, 37.6],
+          [-77.4, 37.5],
+          [-77.5, 37.5]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "GEOID": "51760000200",
+        "TRACT_NAME": "Census Tract 2",
+        "COUNTY": "Norfolk City",
+        "DESIGNATED": "2018-06-14"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-76.3, 36.85],
+          [-76.3, 36.95],
+          [-76.2, 36.95],
+          [-76.2, 36.85],
+          [-76.3, 36.85]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "GEOID": "51760000300",
+        "TRACT_NAME": "Census Tract 3 - Outside Territory",
+        "COUNTY": "Sample County",
+        "DESIGNATED": "2018-06-14"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-80.0, 37.0],
+          [-80.0, 37.1],
+          [-79.9, 37.1],
+          [-79.9, 37.0],
+          [-80.0, 37.0]
+        ]]
+      }
+    }
+  ]
+}
