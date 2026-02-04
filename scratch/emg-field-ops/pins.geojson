@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "deal",
+        "date": "2025-01-15",
+        "rep": "historical"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-77.4360, 37.5407]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "deal",
+        "date": "2025-01-20",
+        "rep": "historical"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-77.4380, 37.5420]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "callback",
+        "date": "2025-01-22",
+        "rep": "historical"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-77.4350, 37.5395]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "dnc",
+        "date": "2025-01-10",
+        "rep": "historical"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-77.4370, 37.5415]
+      }
+    }
+  ]
+}

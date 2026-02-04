@@ -275,17 +275,17 @@
         .toast.callback { background: var(--warning); color: var(--bg); border-color: var(--warning); }
         .toast.dnc { border-color: var(--danger); }
 
-        /* Pin markers on map */
+        /* Pin markers on map - NEW (today's pins) */
         .pin-marker {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            border: 2px solid white;
+            border: 3px solid white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            font-size: 14px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.5);
         }
         .pin-marker.deal { background: var(--success); }
         .pin-marker.callback { background: var(--warning); }
@@ -293,6 +293,46 @@
         .pin-marker.no-interest { background: var(--danger); }
         .pin-marker.not-qualified { background: #8B4513; }
         .pin-marker.dnc { background: #1a1a1a; border-color: var(--danger); }
+
+        /* Historical pins - smaller, faded */
+        .pin-marker.historical {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.5);
+            font-size: 10px;
+            opacity: 0.7;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* Legend */
+        .legend {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1000;
+            background: rgba(18,18,31,0.95);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.65rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.25rem;
+        }
+        .legend-item:last-child { margin-bottom: 0; }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1px solid white;
+        }
+        .legend-dot.historical { opacity: 0.5; width: 8px; height: 8px; }
+        .legend-dot.deal { background: var(--success); }
+        .legend-dot.callback { background: var(--warning); }
+        .legend-dot.dnc { background: #1a1a1a; border-color: var(--danger); }
     </style>
 </head>
 <body>
@@ -320,6 +360,27 @@
             <div id="map"></div>
             <div class="crosshair">📍</div>
             <button class="gps-btn" id="gpsBtn" onclick="centerOnMe()">📍</button>
+
+            <!-- Legend -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-dot deal"></div>
+                    <span>Deal</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot callback"></div>
+                    <span>Callback</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot dnc"></div>
+                    <span>DNC</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot historical deal"></div>
+                    <span style="color:var(--muted)">Old pins</span>
+                </div>
+            </div>
+
             <div class="address-bar" id="addressBar">
                 <div class="address-text" id="addressText">Tap map to select location</div>
                 <div class="address-meta" id="addressMeta">Move map to position pin</div>
@@ -390,10 +451,20 @@
         // ========================================
         // STATE
         // ========================================
-        let pins = [];
+        let pins = [];  // Today's pins
+        let historicalPins = [];  // Old pins from data file
         let stats = { deal: 0, callback: 0, 'not-home': 0, 'no-interest': 0, 'not-qualified': 0, dnc: 0 };
         let currentLocation = null;
         let userMarker = null;
+
+        const icons = {
+            'deal': '💰', 'callback': '📞', 'not-home': '🏠',
+            'no-interest': '✋', 'not-qualified': '❌', 'dnc': '🚫'
+        };
+        const colors = {
+            'deal': '#00ff88', 'callback': '#ffd93d', 'not-home': '#555555',
+            'no-interest': '#ff6b6b', 'not-qualified': '#8B4513', 'dnc': '#1a1a1a'
+        };
 
         // ========================================
         // MAP SETUP
@@ -413,6 +484,37 @@
                 }).addTo(map);
             }).catch(() => {});
 
+        // Load historical pins from data file
+        fetch('pins.geojson')
+            .then(r => r.json())
+            .then(data => {
+                if (data.features) {
+                    data.features.forEach(f => {
+                        const props = f.properties || {};
+                        const type = props.type || props.status || 'deal';
+                        const coords = f.geometry.coordinates;
+                        const lat = coords[1];
+                        const lng = coords[0];
+
+                        historicalPins.push({ type, lat, lng, historical: true });
+
+                        // Add smaller historical marker
+                        const marker = L.divIcon({
+                            className: 'pin-marker-wrapper',
+                            html: `<div class="pin-marker historical ${type}" style="background:${colors[type] || colors.deal}">${icons[type] || '📍'}</div>`,
+                            iconSize: [18, 18],
+                            iconAnchor: [9, 9]
+                        });
+                        L.marker([lat, lng], { icon: marker })
+                            .addTo(map)
+                            .bindPopup(`<b>${type.toUpperCase()}</b><br><span style="color:#888">Historical</span>`);
+                    });
+                    updateAddress();
+                }
+            }).catch(() => {
+                // No historical pins file - that's ok
+            });
+
         // Update address on map move
         map.on('moveend', updateAddress);
         map.on('move', updateAddress);
@@ -421,8 +523,9 @@
             const center = map.getCenter();
             document.getElementById('addressText').textContent =
                 `${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}`;
+            const totalPins = pins.length + historicalPins.length;
             document.getElementById('addressMeta').textContent =
-                `Zoom: ${map.getZoom()} • ${pins.length} pins dropped`;
+                `${pins.length} today • ${historicalPins.length} historical • ${totalPins} total`;
         }
 
         // ========================================
@@ -474,35 +577,17 @@
             pins.push(pin);
             stats[type]++;
 
-            // Add marker to map
-            const icons = {
-                'deal': '💰',
-                'callback': '📞',
-                'not-home': '🏠',
-                'no-interest': '✋',
-                'not-qualified': '❌',
-                'dnc': '🚫'
-            };
-
-            const colors = {
-                'deal': '#00ff88',
-                'callback': '#ffd93d',
-                'not-home': '#555555',
-                'no-interest': '#ff6b6b',
-                'not-qualified': '#8B4513',
-                'dnc': '#1a1a1a'
-            };
-
+            // Add marker to map (larger for today's pins)
             const marker = L.divIcon({
                 className: 'pin-marker-wrapper',
                 html: `<div class="pin-marker ${type}" style="background:${colors[type]}">${icons[type]}</div>`,
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
             });
 
             L.marker([pin.lat, pin.lng], { icon: marker })
                 .addTo(map)
-                .bindPopup(`<b>${type.toUpperCase()}</b><br>${new Date().toLocaleTimeString()}`);
+                .bindPopup(`<b>${type.toUpperCase()}</b><br>${new Date().toLocaleTimeString()}<br><span style="color:var(--success)">Today</span>`);
 
             // Update display
             updateDisplay();
@@ -584,23 +669,17 @@
             const savedPins = localStorage.getItem('emg_pins_' + today);
             if (savedPins) {
                 pins = JSON.parse(savedPins);
-                // Recreate markers
+                // Recreate markers for today's pins
                 pins.forEach(pin => {
-                    const icons = {
-                        'deal': '💰', 'callback': '📞', 'not-home': '🏠',
-                        'no-interest': '✋', 'not-qualified': '❌', 'dnc': '🚫'
-                    };
-                    const colors = {
-                        'deal': '#00ff88', 'callback': '#ffd93d', 'not-home': '#555555',
-                        'no-interest': '#ff6b6b', 'not-qualified': '#8B4513', 'dnc': '#1a1a1a'
-                    };
                     const marker = L.divIcon({
                         className: 'pin-marker-wrapper',
                         html: `<div class="pin-marker ${pin.type}" style="background:${colors[pin.type]}">${icons[pin.type]}</div>`,
-                        iconSize: [24, 24],
-                        iconAnchor: [12, 12]
+                        iconSize: [28, 28],
+                        iconAnchor: [14, 14]
                     });
-                    L.marker([pin.lat, pin.lng], { icon: marker }).addTo(map);
+                    L.marker([pin.lat, pin.lng], { icon: marker })
+                        .addTo(map)
+                        .bindPopup(`<b>${pin.type.toUpperCase()}</b><br><span style="color:var(--success)">Today</span>`);
                 });
             }
 
