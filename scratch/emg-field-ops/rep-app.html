@@ -422,7 +422,6 @@
             font-size: 1rem;
         }
         .callback-btn.call { background: var(--success); color: var(--bg); }
-        .callback-btn.nav { background: var(--accent); color: var(--bg); }
 
         /* Routes Panel */
         .routes-list { max-height: 400px; overflow-y: auto; }
@@ -958,7 +957,6 @@
                     </div>
                     <div class="callback-actions">
                         ${cb.phone ? `<button class="callback-btn call" onclick="callNumber('${cb.phone}')">📞</button>` : ''}
-                        ${cb.location ? `<button class="callback-btn nav" onclick="navigateTo(${cb.location.lat}, ${cb.location.lng})">🧭</button>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -968,9 +966,6 @@
             window.location.href = 'tel:' + phone.replace(/\D/g, '');
         }
 
-        function navigateTo(lat, lng) {
-            window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
-        }
 
         // ========================================
         // ROUTES
