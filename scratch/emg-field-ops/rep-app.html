@@ -364,20 +364,24 @@
             <!-- Legend -->
             <div class="legend">
                 <div class="legend-item">
-                    <div class="legend-dot deal"></div>
-                    <span>Deal</span>
+                    <div class="legend-dot" style="background:#00ff88"></div>
+                    <span>New Deal</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-dot callback"></div>
+                    <div class="legend-dot" style="background:#ffd93d"></div>
                     <span>Callback</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-dot dnc"></div>
-                    <span>DNC</span>
+                    <div class="legend-dot historical" style="background:#00cc66"></div>
+                    <span style="color:var(--muted)">Valid (old)</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-dot historical deal"></div>
-                    <span style="color:var(--muted)">Old pins</span>
+                    <div class="legend-dot historical" style="background:#cc9900"></div>
+                    <span style="color:var(--muted)">Pending</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot historical" style="background:#cc3333"></div>
+                    <span style="color:var(--muted)">Invalid</span>
                 </div>
             </div>
 
@@ -458,12 +462,30 @@
         let userMarker = null;
 
         const icons = {
+            // Today's pins
             'deal': '💰', 'callback': '📞', 'not-home': '🏠',
-            'no-interest': '✋', 'not-qualified': '❌', 'dnc': '🚫'
+            'no-interest': '✋', 'not-qualified': '❌', 'dnc': '🚫',
+            // Historical statuses
+            'complete': '✓', 'pending': '⏳', 'invalid': '✗',
+            'old-deal': '💰', 'old-callback': '📞', 'old-dnc': '🚫'
         };
         const colors = {
-            'deal': '#00ff88', 'callback': '#ffd93d', 'not-home': '#555555',
-            'no-interest': '#ff6b6b', 'not-qualified': '#8B4513', 'dnc': '#1a1a1a'
+            // Today's pins - BRIGHT
+            'deal': '#00ff88',           // Bright green
+            'callback': '#ffd93d',       // Bright yellow
+            'not-home': '#555555',       // Gray
+            'no-interest': '#ff6b6b',    // Red
+            'not-qualified': '#8B4513',  // Brown
+            'dnc': '#1a1a1a',            // Black
+            // Historical - Valid
+            'complete': '#00cc66',       // Green (valid old deal)
+            'old-deal': '#00cc66',
+            // Historical - Pending
+            'pending': '#cc9900',        // Orange/yellow (needs follow-up)
+            'old-callback': '#cc9900',
+            // Historical - Invalid
+            'invalid': '#cc3333',        // Red (bad lead)
+            'old-dnc': '#660000'         // Dark red
         };
 
         // ========================================
@@ -485,34 +507,47 @@
             }).catch(() => {});
 
         // Load historical pins from data file
+        let historicalStats = { complete: 0, pending: 0, invalid: 0 };
+
         fetch('pins.geojson')
             .then(r => r.json())
             .then(data => {
                 if (data.features) {
                     data.features.forEach(f => {
                         const props = f.properties || {};
-                        const type = props.type || props.status || 'deal';
+                        const type = props.type || 'complete';
                         const coords = f.geometry.coordinates;
                         const lat = coords[1];
                         const lng = coords[0];
 
-                        historicalPins.push({ type, lat, lng, historical: true });
+                        historicalPins.push({ type, lat, lng, historical: true, props });
+                        historicalStats[type] = (historicalStats[type] || 0) + 1;
 
-                        // Add smaller historical marker
+                        // Color based on status
+                        const color = colors[type] || colors.complete;
+                        const icon = type === 'complete' ? '✓' : type === 'pending' ? '⏳' : '✗';
+
                         const marker = L.divIcon({
                             className: 'pin-marker-wrapper',
-                            html: `<div class="pin-marker historical ${type}" style="background:${colors[type] || colors.deal}">${icons[type] || '📍'}</div>`,
+                            html: `<div class="pin-marker historical" style="background:${color}">${icon}</div>`,
                             iconSize: [18, 18],
                             iconAnchor: [9, 9]
                         });
+
+                        const popup = `<b>${type.toUpperCase()}</b><br>
+                            ${props.rep || ''}<br>
+                            ${props.date || ''}<br>
+                            <span style="color:#888">${props.city || ''}</span>`;
+
                         L.marker([lat, lng], { icon: marker })
                             .addTo(map)
-                            .bindPopup(`<b>${type.toUpperCase()}</b><br><span style="color:#888">Historical</span>`);
+                            .bindPopup(popup);
                     });
                     updateAddress();
+                    console.log('Loaded historical pins:', historicalStats);
                 }
-            }).catch(() => {
-                // No historical pins file - that's ok
+            }).catch(e => {
+                console.log('No historical pins file or error:', e);
             });
 
         // Update address on map move
@@ -523,9 +558,12 @@
             const center = map.getCenter();
             document.getElementById('addressText').textContent =
                 `${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}`;
-            const totalPins = pins.length + historicalPins.length;
+
+            const valid = historicalPins.filter(p => p.type === 'complete').length;
+            const pending = historicalPins.filter(p => p.type === 'pending').length;
+
             document.getElementById('addressMeta').textContent =
-                `${pins.length} today • ${historicalPins.length} historical • ${totalPins} total`;
+                `Today: ${pins.length} | Old: ${valid} valid, ${pending} pending`;
         }
 
         // ========================================
