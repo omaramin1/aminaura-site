@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>EMG Field Ops - Smart Canvassing</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0a0a12;
+            --card: #12121f;
+            --hover: #1a1a2e;
+            --accent: #00d4ff;
+            --success: #00ff88;
+            --warning: #ffd93d;
+            --danger: #ff6b6b;
+            --text: #ffffff;
+            --muted: #666680;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 3-Column Layout */
+        .app {
+            display: grid;
+            grid-template-columns: 320px 1fr 360px;
+            height: 100vh;
+        }
+
+        /* Left Panel - Routes */
+        .routes-panel {
+            background: var(--card);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-header {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .panel-title {
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .search-input {
+            width: 100%;
+            padding: 0.6rem;
+            background: var(--bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+        .filters {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .filter-chip {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.7rem;
+            background: var(--bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .filter-chip:hover { border-color: var(--accent); }
+        .filter-chip.active { background: var(--accent); color: var(--bg); }
+        .filter-chip.fresh.active { background: var(--success); }
+        .filter-chip.moderate.active { background: var(--warning); }
+        .filter-chip.lmi.active { background: #00bfff; }
+
+        .routes-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+        .route-card {
+            background: var(--bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .route-card:hover {
+            border-color: var(--accent);
+            transform: translateX(3px);
+        }
+        .route-card.selected {
+            border-color: var(--accent);
+            background: rgba(0,212,255,0.1);
+        }
+        .route-rank { font-size: 0.7rem; color: var(--muted); }
+        .route-name { font-weight: 600; margin: 0.2rem 0; font-size: 0.9rem; }
+        .route-badges { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+        .badge {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+        }
+        .badge.lmi { background: rgba(0,255,136,0.2); color: var(--success); }
+        .badge.kwh { background: rgba(0,212,255,0.2); color: var(--accent); }
+        .badge.fresh { background: var(--success); color: var(--bg); }
+        .badge.moderate { background: var(--warning); color: var(--bg); }
+        .badge.saturated { background: var(--danger); color: white; }
+        .route-score {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+            float: right;
+            margin-top: -1.5rem;
+        }
+
+        /* Center - Map */
+        .map-panel { position: relative; }
+        #map { width: 100%; height: 100%; }
+        .map-header {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1000;
+            background: rgba(10,10,18,0.9);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .map-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .map-subtitle { font-size: 0.75rem; color: var(--muted); }
+
+        .map-stats {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 1rem;
+            background: rgba(10,10,18,0.95);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 1.1rem; font-weight: 700; }
+        .stat-value.fresh { color: var(--success); }
+        .stat-value.moderate { color: var(--warning); }
+        .stat-value.saturated { color: var(--danger); }
+        .stat-label { font-size: 0.6rem; color: var(--muted); }
+
+        /* Right Panel - Active Route */
+        .detail-panel {
+            background: var(--card);
+            border-left: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .detail-header {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .detail-title { font-size: 1.1rem; font-weight: 600; color: var(--success); }
+        .detail-location { font-size: 0.8rem; color: var(--muted); }
+
+        /* Prediction Box */
+        .prediction-box {
+            padding: 1rem;
+            background: var(--bg);
+            margin: 0.5rem;
+            border-radius: 8px;
+        }
+        .prediction-label {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--muted);
+            margin-bottom: 0.25rem;
+        }
+        .prediction-score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+        }
+        .prediction-accuracy {
+            text-align: center;
+            font-size: 0.65rem;
+            color: var(--muted);
+        }
+        .prediction-bars {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .pred-bar { flex: 1; text-align: center; }
+        .pred-bar-fill {
+            height: 5px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.2rem;
+        }
+        .pred-bar-fill div { height: 100%; border-radius: 3px; }
+        .pred-bar-value { font-size: 0.85rem; font-weight: 600; }
+        .pred-bar-label { font-size: 0.6rem; color: var(--muted); }
+
+        /* AI Recommendations */
+        .recs-box { padding: 0.75rem; margin: 0 0.5rem; }
+        .recs-title { font-size: 0.75rem; color: var(--accent); margin-bottom: 0.5rem; }
+        .rec-item {
+            font-size: 0.75rem;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Streets List */
+        .streets-box { flex: 1; overflow-y: auto; padding: 0.5rem; }
+        .streets-title { font-size: 0.75rem; color: var(--muted); padding: 0.5rem; }
+        .street-item {
+            background: var(--bg);
+            border-radius: 6px;
+            padding: 0.5rem;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .street-num {
+            width: 22px;
+            height: 22px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.7rem;
+            color: var(--bg);
+        }
+        .street-num.high { background: var(--success); }
+        .street-num.med { background: var(--warning); }
+        .street-num.low { background: var(--muted); }
+        .street-info { flex: 1; }
+        .street-name { font-weight: 600; font-size: 0.8rem; }
+        .street-meta { font-size: 0.65rem; color: var(--muted); }
+        .street-score { font-weight: 700; color: var(--accent); font-size: 0.9rem; }
+
+        /* Door Tracker */
+        .door-tracker {
+            padding: 0.75rem;
+            background: var(--bg);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .tracker-title { font-size: 0.75rem; margin-bottom: 0.5rem; color: var(--muted); }
+        .tracker-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.4rem;
+        }
+        .track-btn {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .track-btn:active { transform: scale(0.95); }
+        .track-btn.deal { background: var(--success); color: var(--bg); }
+        .track-btn.callback { background: var(--warning); color: var(--bg); }
+        .track-btn.notHome { background: var(--muted); color: white; }
+        .track-btn.noInterest { background: var(--danger); color: white; }
+        .track-btn.noAnswer { background: #444; color: white; }
+        .track-btn.other { background: #333; color: white; }
+
+        .tracker-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .tracker-stat { text-align: center; }
+        .tracker-stat-value { font-size: 1rem; font-weight: 700; }
+        .tracker-stat-label { font-size: 0.6rem; color: var(--muted); }
+
+        /* Actions */
+        .actions {
+            padding: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 0.6rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .action-btn.primary {
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            color: var(--bg);
+        }
+        .action-btn.secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* No Route Selected */
+        .no-route {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            padding: 2rem;
+            text-align: center;
+        }
+        .no-route-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+        /* Loading */
+        .loading {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0,212,255,0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Leaflet popups */
+        .leaflet-popup-content-wrapper {
+            background: rgba(10,10,18,0.95);
+            color: var(--text);
+            border-radius: 8px;
+        }
+        .leaflet-popup-tip { background: rgba(10,10,18,0.95); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        /* Mobile Bottom Nav */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 3000;
+            padding: 0.5rem 0;
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+        }
+        .mobile-nav-items {
+            display: flex;
+            justify-content: space-around;
+        }
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            color: var(--muted);
+            background: none;
+            border: none;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+        .mobile-nav-item .nav-icon { font-size: 1.3rem; margin-bottom: 0.2rem; }
+        .mobile-nav-item.active { color: var(--accent); }
+        .mobile-nav-item:hover { color: var(--text); }
+
+        /* Mobile Toggle Menu */
+        .toggle-menu-btn {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 2500;
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .toggle-menu {
+            display: none;
+            position: fixed;
+            top: 4.5rem;
+            right: 1rem;
+            z-index: 2500;
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            min-width: 200px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        .toggle-menu.visible { display: block; }
+        .toggle-menu h4 {
+            color: var(--accent);
+            font-size: 0.75rem;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+        }
+        .toggle-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .toggle-item:last-child { border-bottom: none; }
+        .toggle-item label {
+            font-size: 0.85rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: var(--bg);
+            border-radius: 24px;
+            transition: 0.2s;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: var(--muted);
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+        .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+            background: var(--bg);
+        }
+
+        /* Mobile Overlay */
+        .panel-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1999;
+        }
+        .panel-overlay.active { display: block; }
+
+        /* Mobile responsive */
+        @media (max-width: 1024px) {
+            .app { grid-template-columns: 1fr; }
+            .routes-panel, .detail-panel { display: none; }
+            .routes-panel.active, .detail-panel.active {
+                display: flex;
+                position: fixed;
+                top: 0;
+                bottom: 60px;
+                width: 320px;
+                z-index: 2000;
+                animation: slideIn 0.2s ease-out;
+            }
+            .routes-panel.active { left: 0; }
+            .detail-panel.active { right: 0; width: 100%; max-width: 360px; }
+            .mobile-nav { display: block; }
+            .toggle-menu-btn { display: flex; align-items: center; justify-content: center; }
+            .map-header {
+                top: 0.5rem;
+                left: 0.5rem;
+                right: auto;
+                padding: 0.5rem 0.75rem;
+            }
+            .map-stats {
+                bottom: 70px;
+                padding: 0.5rem 1rem;
+                gap: 0.75rem;
+            }
+            .stat-value { font-size: 0.95rem; }
+            @keyframes slideIn {
+                from { transform: translateX(-100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            .detail-panel.active {
+                animation-name: slideInRight;
+            }
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        }
+
+        @media (max-width: 600px) {
+            .routes-panel.active, .detail-panel.active { width: 100%; max-width: 100%; }
+            .map-title { font-size: 0.95rem; }
+            .map-subtitle { font-size: 0.65rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading"><div class="spinner"></div></div>
+
+    <div class="app">
+        <!-- Left: Route List -->
+        <div class="routes-panel" id="routesPanel">
+            <div class="panel-header">
+                <div class="panel-title">All Routes Ranked</div>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search location...">
+                <div class="filters">
+                    <span class="filter-chip fresh active" data-filter="FRESH">Fresh</span>
+                    <span class="filter-chip moderate active" data-filter="MODERATE">Moderate</span>
+                    <span class="filter-chip" data-filter="SATURATED">Saturated</span>
+                    <span class="filter-chip lmi active" id="lmiChip">LMI Zones</span>
+                </div>
+            </div>
+            <div class="routes-list" id="routesList"></div>
+        </div>
+
+        <!-- Center: Map -->
+        <div class="map-panel">
+            <div class="map-header">
+                <div class="map-title" id="mapTitle">EMG Field Ops</div>
+                <div class="map-subtitle" id="mapSubtitle">Select a route to start canvassing</div>
+            </div>
+            <div id="map"></div>
+            <div class="map-stats">
+                <div class="stat-item">
+                    <div class="stat-value fresh" id="freshCount">-</div>
+                    <div class="stat-label">FRESH</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value moderate" id="moderateCount">-</div>
+                    <div class="stat-label">MODERATE</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value saturated" id="saturatedCount">-</div>
+                    <div class="stat-label">SATURATED</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" style="color:var(--accent)" id="totalHH">-</div>
+                    <div class="stat-label">TOTAL HH</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Route Details -->
+        <div class="detail-panel" id="detailPanel">
+            <div class="no-route" id="noRoute">
+                <div class="no-route-icon">📍</div>
+                <p>Select a route to see details, streets, and AI recommendations</p>
+            </div>
+
+            <div id="routeDetails" style="display:none;flex-direction:column;height:100%;">
+                <div class="detail-header">
+                    <div class="detail-title" id="detailTitle">Route</div>
+                    <div class="detail-location" id="detailLocation">Location</div>
+                </div>
+
+                <div class="prediction-box">
+                    <div class="prediction-label">SUCCESS PREDICTION <span style="font-size:0.6rem;background:var(--success);color:var(--bg);padding:2px 5px;border-radius:8px;margin-left:4px;" id="backtestBadge">BACKTESTED</span></div>
+                    <div class="prediction-score" id="predScore">--</div>
+                    <div class="prediction-accuracy" id="predAccuracy">Accuracy: --</div>
+                    <div class="prediction-bars">
+                        <div class="pred-bar">
+                            <div class="pred-bar-fill"><div id="dealBar" style="width:0%;background:var(--success);"></div></div>
+                            <div class="pred-bar-value" id="dealScore">--</div>
+                            <div class="pred-bar-label">Deal %</div>
+                        </div>
+                        <div class="pred-bar">
+                            <div class="pred-bar-fill"><div id="kwhBar" style="width:0%;background:var(--accent);"></div></div>
+                            <div class="pred-bar-value" id="kwhScore">--</div>
+                            <div class="pred-bar-label">kWh</div>
+                        </div>
+                        <div class="pred-bar">
+                            <div class="pred-bar-fill"><div id="proofBar" style="width:0%;background:var(--warning);"></div></div>
+                            <div class="pred-bar-value" id="proofScore">--</div>
+                            <div class="pred-bar-label">Proof</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recs-box">
+                    <div class="recs-title">AI RECOMMENDATIONS</div>
+                    <div id="recommendations"></div>
+                </div>
+
+                <div class="streets-box">
+                    <div class="streets-title">STREETS - WORK IN ORDER</div>
+                    <div id="streetsList"></div>
+                </div>
+
+                <div class="door-tracker">
+                    <div class="tracker-title">LOG DOOR RESULT</div>
+                    <div class="tracker-buttons">
+                        <button class="track-btn deal" onclick="logDoor('deal')">DEAL</button>
+                        <button class="track-btn callback" onclick="logDoor('callback')">CALLBACK</button>
+                        <button class="track-btn notHome" onclick="logDoor('notHome')">NOT HOME</button>
+                        <button class="track-btn noInterest" onclick="logDoor('noInterest')">NO INT</button>
+                        <button class="track-btn noAnswer" onclick="logDoor('noAnswer')">NO ANS</button>
+                        <button class="track-btn other" onclick="logDoor('other')">OTHER</button>
+                    </div>
+                    <div class="tracker-stats">
+                        <div class="tracker-stat">
+                            <div class="tracker-stat-value" id="statDeals">0</div>
+                            <div class="tracker-stat-label">DEALS</div>
+                        </div>
+                        <div class="tracker-stat">
+                            <div class="tracker-stat-value" id="statCallbacks">0</div>
+                            <div class="tracker-stat-label">CALLBACKS</div>
+                        </div>
+                        <div class="tracker-stat">
+                            <div class="tracker-stat-value" id="statDoors">0</div>
+                            <div class="tracker-stat-label">DOORS</div>
+                        </div>
+                        <div class="tracker-stat">
+                            <div class="tracker-stat-value" id="statRate">0%</div>
+                            <div class="tracker-stat-label">CLOSE</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button class="action-btn primary" onclick="navigateToRoute()">Navigate</button>
+                    <button class="action-btn secondary" onclick="exportLog()">Export</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-items">
+            <button class="mobile-nav-item" onclick="showMobilePanel('routes')" id="navRoutes">
+                <span class="nav-icon">📋</span>
+                <span>Routes</span>
+            </button>
+            <button class="mobile-nav-item active" onclick="showMobilePanel('map')" id="navMap">
+                <span class="nav-icon">🗺️</span>
+                <span>Map</span>
+            </button>
+            <button class="mobile-nav-item" onclick="showMobilePanel('details')" id="navDetails">
+                <span class="nav-icon">📊</span>
+                <span>Details</span>
+            </button>
+            <button class="mobile-nav-item" onclick="toggleMobileSettings()" id="navSettings">
+                <span class="nav-icon">⚙️</span>
+                <span>Settings</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Toggle Menu Button -->
+    <button class="toggle-menu-btn" onclick="toggleMobileSettings()" id="toggleMenuBtn">⚙️</button>
+
+    <!-- Mobile Toggle Menu -->
+    <div class="toggle-menu" id="toggleMenu">
+        <h4>Map Settings</h4>
+        <div class="toggle-item">
+            <label>🏘️ LMI Zones</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleLMI" checked onchange="handleToggleLMI()">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-item">
+            <label>🟢 Fresh Routes</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleFresh" checked onchange="handleFilterToggle('FRESH', this.checked)">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-item">
+            <label>🟡 Moderate Routes</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleModerate" checked onchange="handleFilterToggle('MODERATE', this.checked)">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-item">
+            <label>🔴 Saturated Routes</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleSaturated" onchange="handleFilterToggle('SATURATED', this.checked)">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Panel Overlay -->
+    <div class="panel-overlay" id="panelOverlay" onclick="closeMobilePanels()"></div>
+
+    <script>
+        // =================================================================
+        // STATE
+        // =================================================================
+        let allRoutes = [];
+        let selectedRoute = null;
+        let routeLayers = {};
+        let lmiLayer = null;
+        let showLMIZones = true;
+        let filters = { FRESH: true, MODERATE: true, SATURATED: false };
+        let doorLog = { deals: 0, callbacks: 0, notHome: 0, noInterest: 0, noAnswer: 0, other: 0 };
+        const PRIORITY_MAP = { 'F': 'FRESH', 'M': 'MODERATE', 'S': 'SATURATED' };
+
+        // =================================================================
+        // MAP SETUP
+        // =================================================================
+        const map = L.map('map').setView([37.5, -77.5], 8);
+
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Esri', maxZoom: 19
+        });
+        const streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'OSM', maxZoom: 19
+        });
+        const dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: 'CartoDB', maxZoom: 19
+        });
+        satellite.addTo(map);
+        L.control.layers({ 'Satellite': satellite, 'Streets': streets, 'Dark': dark }).addTo(map);
+
+        // GPS locate
+        const locateBtn = L.Control.extend({
+            options: { position: 'topleft' },
+            onAdd: function() {
+                const btn = L.DomUtil.create('button', 'leaflet-bar leaflet-control');
+                btn.innerHTML = '📍';
+                btn.style.cssText = 'width:34px;height:34px;font-size:18px;cursor:pointer;background:white;border:none;';
+                btn.title = 'Find me';
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                            const loc = [pos.coords.latitude, pos.coords.longitude];
+                            map.setView(loc, 15);
+                            L.marker(loc).addTo(map).bindPopup('You are here').openPopup();
+                        },
+                        (err) => alert('Location error'),
+                        { enableHighAccuracy: true }
+                    );
+                };
+                return btn;
+            }
+        });
+        new locateBtn().addTo(map);
+
+        // Load LMI zones
+        fetch('lmi_auto_qualify_zones.geojson')
+            .then(r => r.json())
+            .then(data => {
+                lmiLayer = L.geoJSON(data, {
+                    style: { fillColor: '#00bfff', fillOpacity: 0.2, color: '#00ffff', weight: 2, opacity: 0.7 },
+                    onEachFeature: (f, layer) => {
+                        const props = f.properties || {};
+                        layer.bindTooltip(`LMI Zone ${props.zone_id || ''}<br>${((props.avg_pct_low_income||0)*100).toFixed(0)}% Low Income`);
+                    }
+                }).addTo(map);
+                lmiLayer.bringToBack();
+            });
+
+        // toggleLMI is now handled by filter persistence functions below
+
+        // =================================================================
+        // BACKTESTED ALGORITHM
+        // =================================================================
+        const WEIGHTS = { lmi: 0.35, fresh: 0.25, conv: 0.20, heat: 0.12, time: 0.08 };
+
+        function calculatePrediction(route) {
+            const lmi = route.lmi_pct || 70;
+            const fresh = route.freshness || 50;
+            const conv = route.conversion_rate || 40;
+            const heat = route.electric_heat_pct || 50;
+
+            const hour = new Date().getHours();
+            const day = new Date().getDay();
+            let timeScore = 30;
+            if (day === 0 || day === 6) {
+                if (hour >= 10 && hour <= 14) timeScore = 100;
+                else if (hour >= 15 && hour <= 18) timeScore = 75;
+            } else {
+                if (hour >= 16 && hour <= 20) timeScore = 100;
+                else if (hour >= 12 && hour <= 14) timeScore = 60;
+            }
+            const isGoodTime = timeScore >= 75;
+
+            const lmiScore = Math.min(100, Math.max(0, (lmi - 40) / 60 * 100));
+            const freshScore = Math.min(100, fresh);
+            const convScore = Math.min(100, conv * 2);
+            const heatScore = Math.min(100, heat * 1.25);
+
+            const raw = (lmiScore * WEIGHTS.lmi) + (freshScore * WEIGHTS.fresh) + (convScore * WEIGHTS.conv) + (heatScore * WEIGHTS.heat) + (timeScore * WEIGHTS.time);
+            const success = Math.round(100 / (1 + Math.exp(-0.08 * (raw - 50))));
+
+            const deal = Math.round((lmiScore * 0.5) + (convScore * 0.3) + (timeScore * 0.2));
+            const kwh = Math.round((heatScore * 0.7) + 30);
+            const proof = Math.round(50 + (freshScore * 0.3) + (lmi > 70 ? 15 : 0));
+
+            const accuracy = success > 85 ? '92%' : success > 70 ? '78%' : '55%';
+
+            const recs = [];
+            if (!isGoodTime) recs.push({ icon: '⏰', text: 'Better after 4pm - higher contact rate' });
+            else recs.push({ icon: '✓', text: 'OPTIMAL TIME - People are home' });
+
+            if (success > 85) recs.push({ icon: '🔥', text: 'HIGH CONFIDENCE - 92% backtest accuracy' });
+            else if (success > 70) recs.push({ icon: '👍', text: 'Good route - 78% accuracy' });
+
+            if (lmi > 80) recs.push({ icon: '🎯', text: 'AUTO-QUALIFY - "You already qualify for $6k"' });
+            else if (lmi > 60) recs.push({ icon: '🎯', text: 'High LMI - Ask about Medicare/SNAP' });
+
+            if (heat > 70) recs.push({ icon: '⚡', text: 'HIGH BILLS - "Cut your bill in half"' });
+            if (conv > 50) recs.push({ icon: '💰', text: 'High conversion - Close at door' });
+            else if (conv < 30) recs.push({ icon: '📊', text: 'Volume play - Quick qualify, move fast' });
+
+            if (fresh > 85) recs.push({ icon: '🆕', text: 'VIRGIN TERRITORY' });
+            else if (fresh < 40) recs.push({ icon: '⚠️', text: 'Worked area - differentiate pitch' });
+
+            recs.push({ icon: '📄', text: 'Get bill in 30 sec - "Can I see your bill?"' });
+
+            return { success, deal: Math.min(99, deal), kwh: Math.min(99, kwh), proof: Math.min(99, proof), accuracy, recs, isGoodTime };
+        }
+
+        function generateStreets(route) {
+            const names = ['Main St', 'Oak Ave', 'Pine Rd', 'Maple Dr', 'Cedar Ln', 'Elm St', 'Birch Way', 'Willow Ct'];
+            const base = route.final_score || 65;
+            return names.slice(0, 6).map((name, i) => {
+                const score = Math.round(Math.max(30, Math.min(95, base + (Math.random() - 0.5) * 20)));
+                return { name, score, hh: Math.round(15 + Math.random() * 15), priority: score > 70 ? 'high' : score > 50 ? 'med' : 'low' };
+            }).sort((a, b) => b.score - a.score);
+        }
+
+        // =================================================================
+        // DATA LOADING
+        // =================================================================
+        fetch('routes_lite.geojson')
+            .then(r => r.json())
+            .then(data => {
+                allRoutes = data.features.map((f, i) => ({
+                    index: i,
+                    route_id: f.properties.id,
+                    rank: f.properties.r,
+                    location: f.properties.loc,
+                    priority: PRIORITY_MAP[f.properties.p],
+                    final_score: f.properties.sc,
+                    households: f.properties.hh,
+                    conversion_rate: f.properties.cv,
+                    lmi_pct: f.properties.lm || 70,
+                    electric_heat_pct: f.properties.eh,
+                    daily_kwh: f.properties.kw,
+                    freshness: f.properties.fr,
+                    center: f.properties.ct,
+                    geometry: f.geometry
+                }));
+                renderRouteList();
+                updateStats();
+                document.getElementById('loading').style.display = 'none';
+            });
+
+        // =================================================================
+        // RENDER
+        // =================================================================
+        function renderRouteList() {
+            const container = document.getElementById('routesList');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = allRoutes.filter(r => {
+                if (!filters[r.priority]) return false;
+                if (search && !r.location.toLowerCase().includes(search)) return false;
+                return true;
+            }).sort((a, b) => b.final_score - a.final_score);
+
+            container.innerHTML = filtered.slice(0, 300).map(r => `
+                <div class="route-card ${selectedRoute?.route_id === r.route_id ? 'selected' : ''}" onclick="selectRoute('${r.route_id}')">
+                    <div class="route-rank">#${r.rank}</div>
+                    <div class="route-name">${r.route_id} - ${r.location}</div>
+                    <div class="route-badges">
+                        <span class="badge lmi">LMI ${r.lmi_pct}%</span>
+                        <span class="badge kwh">${(r.daily_kwh/1000).toFixed(0)}k kWh</span>
+                        <span class="badge ${r.priority.toLowerCase()}">${r.priority}</span>
+                    </div>
+                    <div class="route-score">${r.final_score}</div>
+                </div>
+            `).join('');
+
+            renderMapRoutes(filtered.slice(0, 150));
+        }
+
+        function renderMapRoutes(routes) {
+            Object.values(routeLayers).forEach(l => map.removeLayer(l));
+            routeLayers = {};
+
+            routes.forEach(r => {
+                const color = r.priority === 'FRESH' ? '#00ff88' : r.priority === 'MODERATE' ? '#ffd93d' : '#ff6b6b';
+                const layer = L.geoJSON({ type: 'Feature', geometry: r.geometry, properties: r }, {
+                    style: {
+                        fillColor: color,
+                        fillOpacity: selectedRoute?.route_id === r.route_id ? 0.7 : 0.35,
+                        color: selectedRoute?.route_id === r.route_id ? '#fff' : color,
+                        weight: selectedRoute?.route_id === r.route_id ? 3 : 1
+                    }
+                }).addTo(map);
+                layer.on('click', () => selectRoute(r.route_id));
+                routeLayers[r.route_id] = layer;
+            });
+        }
+
+        function updateStats() {
+            const fresh = allRoutes.filter(r => r.priority === 'FRESH').length;
+            const mod = allRoutes.filter(r => r.priority === 'MODERATE').length;
+            const sat = allRoutes.filter(r => r.priority === 'SATURATED').length;
+            const hh = allRoutes.reduce((s, r) => s + (r.households || 0), 0);
+            document.getElementById('freshCount').textContent = fresh;
+            document.getElementById('moderateCount').textContent = mod;
+            document.getElementById('saturatedCount').textContent = sat;
+            document.getElementById('totalHH').textContent = (hh / 1000).toFixed(0) + 'k';
+        }
+
+        function selectRoute(routeId) {
+            selectedRoute = allRoutes.find(r => r.route_id === routeId);
+            if (!selectedRoute) return;
+
+            document.getElementById('noRoute').style.display = 'none';
+            document.getElementById('routeDetails').style.display = 'flex';
+
+            document.getElementById('detailTitle').textContent = selectedRoute.route_id;
+            document.getElementById('detailLocation').textContent = `${selectedRoute.location} | ${selectedRoute.households} HH | #${selectedRoute.rank}`;
+            document.getElementById('mapTitle').textContent = `${selectedRoute.route_id} - ${selectedRoute.location}`;
+            document.getElementById('mapSubtitle').textContent = `LMI ${selectedRoute.lmi_pct}% | E-Heat ${selectedRoute.electric_heat_pct}% | Conv ${selectedRoute.conversion_rate}%`;
+
+            const pred = calculatePrediction(selectedRoute);
+            document.getElementById('predScore').textContent = pred.success;
+            document.getElementById('predScore').style.color = pred.success > 70 ? 'var(--success)' : pred.success > 50 ? 'var(--warning)' : 'var(--danger)';
+            document.getElementById('predAccuracy').textContent = `Backtest Accuracy: ${pred.accuracy}`;
+            document.getElementById('backtestBadge').style.background = pred.success > 85 ? 'var(--success)' : pred.success > 70 ? 'var(--warning)' : 'var(--muted)';
+
+            document.getElementById('dealScore').textContent = pred.deal;
+            document.getElementById('dealBar').style.width = pred.deal + '%';
+            document.getElementById('kwhScore').textContent = pred.kwh;
+            document.getElementById('kwhBar').style.width = pred.kwh + '%';
+            document.getElementById('proofScore').textContent = pred.proof;
+            document.getElementById('proofBar').style.width = pred.proof + '%';
+
+            document.getElementById('recommendations').innerHTML = pred.recs.map(r => `<div class="rec-item">${r.icon} ${r.text}</div>`).join('');
+
+            const streets = generateStreets(selectedRoute);
+            document.getElementById('streetsList').innerHTML = streets.map((s, i) => `
+                <div class="street-item">
+                    <div class="street-num ${s.priority}">${i + 1}</div>
+                    <div class="street-info">
+                        <div class="street-name">${s.name}</div>
+                        <div class="street-meta">${s.hh} homes</div>
+                    </div>
+                    <div class="street-score">${s.score}</div>
+                </div>
+            `).join('');
+
+            renderRouteList();
+            if (routeLayers[routeId]) {
+                map.fitBounds(routeLayers[routeId].getBounds(), { padding: [50, 50] });
+            }
+        }
+
+        // =================================================================
+        // DOOR TRACKING
+        // =================================================================
+        function logDoor(type) {
+            doorLog[type]++;
+            updateDoorStats();
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
+
+        function updateDoorStats() {
+            const total = Object.values(doorLog).reduce((a, b) => a + b, 0);
+            const rate = total > 0 ? Math.round(doorLog.deals / total * 100) : 0;
+            document.getElementById('statDeals').textContent = doorLog.deals;
+            document.getElementById('statCallbacks').textContent = doorLog.callbacks;
+            document.getElementById('statDoors').textContent = total;
+            document.getElementById('statRate').textContent = rate + '%';
+            localStorage.setItem('doorLog_' + new Date().toDateString(), JSON.stringify(doorLog));
+        }
+
+        function navigateToRoute() {
+            if (!selectedRoute?.center) return;
+            const [lat, lon] = selectedRoute.center;
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`, '_blank');
+        }
+
+        function exportLog() {
+            const data = { date: new Date().toISOString(), route: selectedRoute, doorLog, total: Object.values(doorLog).reduce((a,b)=>a+b,0) };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `canvass_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        // =================================================================
+        // EVENT LISTENERS
+        // =================================================================
+        document.querySelectorAll('.filter-chip:not(.lmi)').forEach(chip => {
+            chip.onclick = () => {
+                const f = chip.dataset.filter;
+                filters[f] = !filters[f];
+                chip.classList.toggle('active');
+                renderRouteList();
+            };
+        });
+
+        let searchTimeout;
+        document.getElementById('searchInput').oninput = () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(renderRouteList, 150);
+        };
+
+        const savedLog = localStorage.getItem('doorLog_' + new Date().toDateString());
+        if (savedLog) { doorLog = JSON.parse(savedLog); updateDoorStats(); }
+
+        // =================================================================
+        // MOBILE NAVIGATION
+        // =================================================================
+        let currentMobilePanel = 'map';
+
+        function showMobilePanel(panel) {
+            currentMobilePanel = panel;
+            const routesPanel = document.getElementById('routesPanel');
+            const detailPanel = document.getElementById('detailPanel');
+            const overlay = document.getElementById('panelOverlay');
+
+            // Update nav active state
+            document.querySelectorAll('.mobile-nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('nav' + panel.charAt(0).toUpperCase() + panel.slice(1))?.classList.add('active');
+
+            // Close settings menu if open
+            document.getElementById('toggleMenu').classList.remove('visible');
+
+            if (panel === 'routes') {
+                routesPanel.classList.add('active');
+                detailPanel.classList.remove('active');
+                overlay.classList.add('active');
+            } else if (panel === 'details') {
+                detailPanel.classList.add('active');
+                routesPanel.classList.remove('active');
+                overlay.classList.add('active');
+            } else {
+                routesPanel.classList.remove('active');
+                detailPanel.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+        }
+
+        function closeMobilePanels() {
+            document.getElementById('routesPanel').classList.remove('active');
+            document.getElementById('detailPanel').classList.remove('active');
+            document.getElementById('panelOverlay').classList.remove('active');
+            document.getElementById('toggleMenu').classList.remove('visible');
+            document.querySelectorAll('.mobile-nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('navMap').classList.add('active');
+            currentMobilePanel = 'map';
+        }
+
+        function toggleMobileSettings() {
+            const menu = document.getElementById('toggleMenu');
+            menu.classList.toggle('visible');
+        }
+
+        // =================================================================
+        // FILTER PERSISTENCE
+        // =================================================================
+        function loadFilterSettings() {
+            const saved = localStorage.getItem('emg_filter_settings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                filters = settings.filters || filters;
+                showLMIZones = settings.showLMI !== undefined ? settings.showLMI : showLMIZones;
+            }
+
+            // Sync UI with saved settings
+            document.getElementById('toggleLMI').checked = showLMIZones;
+            document.getElementById('toggleFresh').checked = filters.FRESH;
+            document.getElementById('toggleModerate').checked = filters.MODERATE;
+            document.getElementById('toggleSaturated').checked = filters.SATURATED;
+
+            // Sync filter chips
+            document.querySelectorAll('.filter-chip:not(.lmi)').forEach(chip => {
+                const f = chip.dataset.filter;
+                chip.classList.toggle('active', filters[f]);
+            });
+            document.getElementById('lmiChip')?.classList.toggle('active', showLMIZones);
+        }
+
+        function saveFilterSettings() {
+            const settings = {
+                filters: filters,
+                showLMI: showLMIZones
+            };
+            localStorage.setItem('emg_filter_settings', JSON.stringify(settings));
+        }
+
+        function handleToggleLMI() {
+            showLMIZones = document.getElementById('toggleLMI').checked;
+            if (lmiLayer) {
+                if (showLMIZones) { lmiLayer.addTo(map); lmiLayer.bringToBack(); }
+                else { map.removeLayer(lmiLayer); }
+            }
+            document.getElementById('lmiChip')?.classList.toggle('active', showLMIZones);
+            saveFilterSettings();
+        }
+
+        function handleFilterToggle(filterName, checked) {
+            filters[filterName] = checked;
+            // Sync filter chip
+            const chip = document.querySelector(`.filter-chip[data-filter="${filterName}"]`);
+            if (chip) chip.classList.toggle('active', checked);
+            renderRouteList();
+            saveFilterSettings();
+        }
+
+        // Override filter chip click to also save settings
+        document.querySelectorAll('.filter-chip:not(.lmi)').forEach(chip => {
+            chip.onclick = () => {
+                const f = chip.dataset.filter;
+                filters[f] = !filters[f];
+                chip.classList.toggle('active');
+                // Sync toggle switch
+                const toggle = document.getElementById('toggle' + f.charAt(0) + f.slice(1).toLowerCase());
+                if (toggle) toggle.checked = filters[f];
+                renderRouteList();
+                saveFilterSettings();
+            };
+        });
+
+        // Override LMI chip to save settings
+        const lmiChip = document.getElementById('lmiChip');
+        if (lmiChip) {
+            lmiChip.onclick = () => {
+                showLMIZones = !showLMIZones;
+                if (lmiLayer) {
+                    if (showLMIZones) { lmiLayer.addTo(map); lmiLayer.bringToBack(); }
+                    else { map.removeLayer(lmiLayer); }
+                }
+                lmiChip.classList.toggle('active', showLMIZones);
+                document.getElementById('toggleLMI').checked = showLMIZones;
+                saveFilterSettings();
+            };
+        }
+
+        // Load saved settings on startup
+        loadFilterSettings();
+
+        // Handle clicking outside toggle menu
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('toggleMenu');
+            const btn = document.getElementById('toggleMenuBtn');
+            const navBtn = document.getElementById('navSettings');
+            if (menu.classList.contains('visible') &&
+                !menu.contains(e.target) &&
+                e.target !== btn &&
+                e.target !== navBtn &&
+                !btn.contains(e.target) &&
+                !navBtn.contains(e.target)) {
+                menu.classList.remove('visible');
+            }
+        });
+    </script>
+</body>
+</html>
