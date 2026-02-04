@@ -30,243 +30,165 @@
             touch-action: manipulation;
         }
 
-        /* ===== MAIN LAYOUT ===== */
         .app { display: flex; flex-direction: column; height: 100%; }
 
-        /* ===== DOOR COUNTER HEADER ===== */
-        .door-header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #0a0a12 100%);
-            padding: 1rem;
-            padding-top: calc(1rem + env(safe-area-inset-top));
+        /* ===== HEADER ===== */
+        .header {
+            background: var(--card);
+            padding: 0.75rem 1rem;
+            padding-top: calc(0.75rem + env(safe-area-inset-top));
             border-bottom: 1px solid rgba(255,255,255,0.1);
             display: flex;
             align-items: center;
             gap: 1rem;
         }
         .door-counter {
-            flex: 1;
-            text-align: center;
+            display: flex;
+            align-items: baseline;
+            gap: 0.25rem;
         }
         .door-count {
-            font-size: 3rem;
+            font-size: 2rem;
             font-weight: 800;
-            line-height: 1;
+            color: var(--success);
         }
-        .door-count .current { color: var(--success); }
-        .door-count .divider { color: var(--muted); font-weight: 400; }
-        .door-count .goal { color: var(--muted); font-size: 1.5rem; }
-        .door-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-        .door-progress {
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            margin-top: 0.5rem;
-            overflow: hidden;
+        .door-goal {
+            font-size: 1rem;
+            color: var(--muted);
         }
-        .door-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), var(--accent));
-            border-radius: 3px;
-            transition: width 0.3s;
+        .header-stats {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
         }
-
-        .stat-box {
+        .header-stat {
             text-align: center;
-            min-width: 50px;
         }
-        .stat-box-value {
-            font-size: 1.5rem;
+        .header-stat-value {
+            font-size: 1.25rem;
             font-weight: 700;
         }
-        .stat-box-value.deals { color: var(--success); }
-        .stat-box-value.callbacks { color: var(--warning); }
-        .stat-box-value.rate { color: var(--accent); }
-        .stat-box-label { font-size: 0.6rem; color: var(--muted); }
+        .header-stat-value.deals { color: var(--success); }
+        .header-stat-value.callbacks { color: var(--warning); }
+        .header-stat-label {
+            font-size: 0.55rem;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
 
-        /* ===== MAP SECTION ===== */
-        .map-section {
+        /* ===== MAP ===== */
+        .map-container {
             flex: 1;
             position: relative;
-            min-height: 0;
         }
         #map { width: 100%; height: 100%; }
 
-        /* Zone Intel Overlay */
-        .zone-intel {
+        /* Center crosshair for pin dropping */
+        .crosshair {
             position: absolute;
-            top: 0.75rem;
-            left: 0.75rem;
-            right: 0.75rem;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 1000;
-            background: rgba(10,10,18,0.95);
-            border-radius: 12px;
-            padding: 0.75rem;
-            border: 1px solid rgba(255,255,255,0.1);
-            display: none;
-        }
-        .zone-intel.active { display: block; }
-        .zone-intel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        .zone-name { font-weight: 700; font-size: 1rem; }
-        .zone-score {
-            font-size: 1.5rem;
-            font-weight: 800;
-            padding: 0.25rem 0.75rem;
-            border-radius: 8px;
-            background: var(--success);
-            color: var(--bg);
-        }
-        .zone-score.medium { background: var(--warning); }
-        .zone-score.low { background: var(--danger); }
-        .zone-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-        .zone-badge {
-            font-size: 0.7rem;
-            padding: 0.3rem 0.6rem;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        .zone-badge.lmi { background: rgba(0,255,136,0.2); color: var(--success); }
-        .zone-badge.auto-qualify { background: var(--gold); color: var(--bg); }
-        .zone-badge.mhp { background: rgba(255,215,0,0.3); color: var(--gold); }
-        .zone-badge.fresh { background: var(--success); color: var(--bg); }
-        .zone-badge.electric { background: rgba(0,212,255,0.2); color: var(--accent); }
-
-        /* Pitch Helper */
-        .pitch-helper {
-            margin-top: 0.5rem;
-            padding-top: 0.5rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        .pitch-line {
-            font-size: 0.8rem;
-            color: var(--accent);
-            font-style: italic;
+            pointer-events: none;
+            font-size: 2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* GPS Button */
+        /* GPS button */
         .gps-btn {
             position: absolute;
-            bottom: 1rem;
+            top: 1rem;
             right: 1rem;
             z-index: 1000;
-            width: 50px;
-            height: 50px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             background: var(--card);
             border: 2px solid var(--accent);
             color: var(--accent);
-            font-size: 1.5rem;
+            font-size: 1.25rem;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
-        .gps-btn:active { transform: scale(0.95); }
-        .gps-btn.tracking { background: var(--accent); color: var(--bg); animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.4); }
-            50% { box-shadow: 0 0 0 15px rgba(0,212,255,0); }
+        .gps-btn.active {
+            background: var(--accent);
+            color: var(--bg);
         }
 
-        /* ===== QUICK ACTION BUTTONS ===== */
-        .action-section {
+        /* Address display */
+        .address-bar {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            background: rgba(18,18,31,0.95);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .address-text {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .address-meta {
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+
+        /* ===== PIN BUTTONS ===== */
+        .pin-section {
             background: var(--card);
             padding: 1rem;
             padding-bottom: calc(1rem + env(safe-area-inset-bottom));
             border-top: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* Primary Door Actions - Big Buttons */
-        .door-actions {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
+        .pin-instruction {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--muted);
             margin-bottom: 0.75rem;
         }
-        .door-btn {
-            padding: 1.25rem 0.5rem;
+
+        .pin-buttons {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+        }
+        .pin-btn {
+            aspect-ratio: 1;
             border: none;
             border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 700;
+            font-size: 1.5rem;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.25rem;
-            transition: transform 0.1s, box-shadow 0.1s;
+            justify-content: center;
+            gap: 0.2rem;
+            transition: transform 0.1s;
         }
-        .door-btn:active { transform: scale(0.95); }
-        .door-btn .icon { font-size: 1.5rem; }
-        .door-btn.deal {
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
-            color: var(--bg);
-            box-shadow: 0 4px 15px rgba(0,255,136,0.3);
-        }
-        .door-btn.callback {
-            background: linear-gradient(135deg, #ffd93d 0%, #f0c000 100%);
-            color: var(--bg);
-            box-shadow: 0 4px 15px rgba(255,217,61,0.3);
-        }
-        .door-btn.not-home {
-            background: linear-gradient(135deg, #666680 0%, #4a4a5c 100%);
-            color: white;
-        }
-
-        /* Secondary Actions Row */
-        .secondary-actions {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.4rem;
-        }
-        .sec-btn {
-            padding: 0.75rem 0.25rem;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            background: var(--bg);
-            color: var(--text);
-            font-size: 0.65rem;
+        .pin-btn:active { transform: scale(0.9); }
+        .pin-btn .label {
+            font-size: 0.5rem;
             font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.2rem;
+            text-transform: uppercase;
         }
-        .sec-btn:active { background: rgba(255,255,255,0.1); }
-        .sec-btn .icon { font-size: 1.1rem; }
-        .sec-btn.no-interest { color: var(--danger); border-color: rgba(255,107,107,0.3); }
-        .sec-btn.dnc { color: var(--danger); border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.1); }
 
-        /* ===== BOTTOM NAV ===== */
-        .bottom-nav {
-            display: flex;
-            background: var(--bg);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .nav-btn {
-            flex: 1;
-            padding: 0.75rem;
-            border: none;
-            background: none;
-            color: var(--muted);
-            font-size: 0.6rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.2rem;
-            cursor: pointer;
-        }
-        .nav-btn .icon { font-size: 1.3rem; }
-        .nav-btn.active { color: var(--accent); }
+        .pin-btn.deal { background: var(--success); color: var(--bg); }
+        .pin-btn.callback { background: var(--warning); color: var(--bg); }
+        .pin-btn.not-home { background: #555; color: white; }
+        .pin-btn.no-interest { background: var(--danger); color: white; }
+        .pin-btn.not-qualified { background: #8B4513; color: white; }
+        .pin-btn.dnc { background: #1a1a1a; color: var(--danger); border: 2px solid var(--danger); }
 
-        /* ===== MODALS ===== */
+        /* ===== CALLBACK MODAL ===== */
         .modal {
             position: fixed;
             inset: 0;
@@ -274,13 +196,11 @@
             z-index: 5000;
             display: none;
             align-items: flex-end;
-            justify-content: center;
         }
         .modal.active { display: flex; }
         .modal-content {
             background: var(--card);
             width: 100%;
-            max-width: 500px;
             border-radius: 20px 20px 0 0;
             padding: 1.5rem;
             padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
@@ -296,7 +216,7 @@
             align-items: center;
             margin-bottom: 1rem;
         }
-        .modal-title { font-size: 1.2rem; font-weight: 700; }
+        .modal-title { font-size: 1.1rem; font-weight: 700; }
         .modal-close {
             width: 32px;
             height: 32px;
@@ -308,833 +228,393 @@
             cursor: pointer;
         }
 
-        /* Lead Form */
-        .form-group { margin-bottom: 1rem; }
-        .form-label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.3rem; }
+        .form-group { margin-bottom: 0.75rem; }
+        .form-label { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 0.25rem; }
         .form-input {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.6rem;
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
             background: var(--bg);
             color: var(--text);
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
-        .form-input:focus { outline: none; border-color: var(--accent); }
-        .form-textarea { min-height: 80px; resize: none; }
-        .form-row { display: flex; gap: 0.75rem; }
+        .form-row { display: flex; gap: 0.5rem; }
         .form-row .form-group { flex: 1; }
-
-        .housing-types {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
-        }
-        .housing-btn {
-            padding: 0.75rem;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            background: var(--bg);
-            color: var(--text);
-            font-size: 0.75rem;
-            cursor: pointer;
-            text-align: center;
-        }
-        .housing-btn.selected { border-color: var(--accent); background: rgba(0,212,255,0.1); }
-        .housing-btn .icon { font-size: 1.5rem; display: block; margin-bottom: 0.25rem; }
-
-        .photo-capture {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-        .photo-btn {
-            flex: 1;
-            padding: 1rem;
-            border: 2px dashed rgba(255,255,255,0.2);
-            border-radius: 12px;
-            background: var(--bg);
-            color: var(--muted);
-            font-size: 0.8rem;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .photo-btn .icon { font-size: 2rem; }
-        .photo-btn.has-photo { border-color: var(--success); color: var(--success); }
 
         .submit-btn {
             width: 100%;
-            padding: 1rem;
+            padding: 0.875rem;
             border: none;
-            border-radius: 12px;
-            background: linear-gradient(90deg, var(--accent), var(--success));
+            border-radius: 10px;
+            background: var(--warning);
             color: var(--bg);
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
+            margin-top: 0.5rem;
         }
-        .submit-btn:active { transform: scale(0.98); }
 
-        /* Stats Panel */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        .stat-card {
-            background: var(--bg);
-            border-radius: 12px;
-            padding: 1rem;
-            text-align: center;
-        }
-        .stat-card-value {
-            font-size: 2rem;
-            font-weight: 800;
-        }
-        .stat-card-label { font-size: 0.7rem; color: var(--muted); }
-        .stat-card.highlight { border: 2px solid var(--success); }
-        .stat-card.highlight .stat-card-value { color: var(--success); }
-
-        /* Callbacks List */
-        .callbacks-list { max-height: 300px; overflow-y: auto; }
-        .callback-item {
-            background: var(--bg);
-            border-radius: 8px;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .callback-info { flex: 1; }
-        .callback-name { font-weight: 600; }
-        .callback-notes { font-size: 0.75rem; color: var(--muted); }
-        .callback-actions { display: flex; gap: 0.5rem; }
-        .callback-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        .callback-btn.call { background: var(--success); color: var(--bg); }
-
-        /* Routes Panel */
-        .routes-list { max-height: 400px; overflow-y: auto; }
-        .route-item {
-            background: var(--bg);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-        .route-item:active { background: rgba(255,255,255,0.05); }
-        .route-item.selected { border-color: var(--accent); }
-        .route-item-score {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            background: var(--success);
-            color: var(--bg);
-            font-weight: 800;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .route-item-score.medium { background: var(--warning); }
-        .route-item-score.low { background: var(--danger); }
-        .route-item-info { flex: 1; }
-        .route-item-name { font-weight: 600; }
-        .route-item-meta { font-size: 0.75rem; color: var(--muted); }
-        .route-item-badges { display: flex; gap: 0.3rem; margin-top: 0.25rem; }
-
-        /* Leaderboard */
-        .leaderboard { margin-top: 1rem; }
-        .leaderboard-title { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .leaderboard-rank {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--muted);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-        .leaderboard-rank.gold { background: var(--gold); color: var(--bg); }
-        .leaderboard-rank.silver { background: #c0c0c0; color: var(--bg); }
-        .leaderboard-rank.bronze { background: #cd7f32; color: var(--bg); }
-        .leaderboard-name { flex: 1; }
-        .leaderboard-score { font-weight: 700; color: var(--accent); }
-
-        /* Toast Notifications */
+        /* ===== TOAST ===== */
         .toast {
             position: fixed;
             top: calc(1rem + env(safe-area-inset-top));
             left: 50%;
             transform: translateX(-50%) translateY(-100px);
             background: var(--card);
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1.25rem;
             border-radius: 25px;
             font-weight: 600;
+            font-size: 0.9rem;
             z-index: 9999;
             transition: transform 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border: 2px solid var(--success);
         }
         .toast.show { transform: translateX(-50%) translateY(0); }
-        .toast.success { border: 2px solid var(--success); }
-        .toast.warning { border: 2px solid var(--warning); }
-        .toast.deal { background: var(--success); color: var(--bg); }
+        .toast.deal { background: var(--success); color: var(--bg); border-color: var(--success); }
+        .toast.callback { background: var(--warning); color: var(--bg); border-color: var(--warning); }
+        .toast.dnc { border-color: var(--danger); }
 
-        /* Hidden file input */
-        .hidden { display: none; }
+        /* Pin markers on map */
+        .pin-marker {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+        .pin-marker.deal { background: var(--success); }
+        .pin-marker.callback { background: var(--warning); }
+        .pin-marker.not-home { background: #555; }
+        .pin-marker.no-interest { background: var(--danger); }
+        .pin-marker.not-qualified { background: #8B4513; }
+        .pin-marker.dnc { background: #1a1a1a; border-color: var(--danger); }
     </style>
 </head>
 <body>
     <div class="app">
-        <!-- Door Counter Header -->
-        <header class="door-header">
-            <div class="stat-box">
-                <div class="stat-box-value deals" id="dealsCount">0</div>
-                <div class="stat-box-label">DEALS</div>
-            </div>
+        <!-- Header with counts -->
+        <header class="header">
             <div class="door-counter">
-                <div class="door-count">
-                    <span class="current" id="doorCount">0</span><span class="divider">/</span><span class="goal">150</span>
-                </div>
-                <div class="door-label">Doors Today</div>
-                <div class="door-progress">
-                    <div class="door-progress-fill" id="doorProgress" style="width: 0%"></div>
-                </div>
+                <span class="door-count" id="doorCount">0</span>
+                <span class="door-goal">/ 150</span>
             </div>
-            <div class="stat-box">
-                <div class="stat-box-value rate" id="closeRate">0%</div>
-                <div class="stat-box-label">CLOSE</div>
+            <div class="header-stats">
+                <div class="header-stat">
+                    <div class="header-stat-value deals" id="dealCount">0</div>
+                    <div class="header-stat-label">Deals</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value callbacks" id="callbackCount">0</div>
+                    <div class="header-stat-label">Callbacks</div>
+                </div>
             </div>
         </header>
 
-        <!-- Map Section -->
-        <section class="map-section">
+        <!-- Map -->
+        <div class="map-container">
             <div id="map"></div>
-
-            <!-- Zone Intel Overlay -->
-            <div class="zone-intel" id="zoneIntel">
-                <div class="zone-intel-header">
-                    <div class="zone-name" id="zoneName">Select a Zone</div>
-                    <div class="zone-score" id="zoneScore">--</div>
-                </div>
-                <div class="zone-badges" id="zoneBadges"></div>
-                <div class="pitch-helper">
-                    <div class="pitch-line" id="pitchLine">"You already qualify for the $6,000 federal rebate"</div>
-                </div>
+            <div class="crosshair">📍</div>
+            <button class="gps-btn" id="gpsBtn" onclick="centerOnMe()">📍</button>
+            <div class="address-bar" id="addressBar">
+                <div class="address-text" id="addressText">Tap map to select location</div>
+                <div class="address-meta" id="addressMeta">Move map to position pin</div>
             </div>
+        </div>
 
-            <!-- GPS Button -->
-            <button class="gps-btn" id="gpsBtn" onclick="toggleGPS()">📍</button>
-        </section>
-
-        <!-- Quick Action Buttons -->
-        <section class="action-section">
-            <div class="door-actions">
-                <button class="door-btn deal" onclick="logDoor('deal')">
-                    <span class="icon">💰</span>
-                    DEAL
+        <!-- Pin buttons -->
+        <section class="pin-section">
+            <div class="pin-instruction">DROP PIN AT CROSSHAIR</div>
+            <div class="pin-buttons">
+                <button class="pin-btn deal" onclick="dropPin('deal')">
+                    <span>💰</span>
+                    <span class="label">Deal</span>
                 </button>
-                <button class="door-btn callback" onclick="openCallbackModal()">
-                    <span class="icon">📞</span>
-                    CALLBACK
+                <button class="pin-btn callback" onclick="openCallback()">
+                    <span>📞</span>
+                    <span class="label">Callback</span>
                 </button>
-                <button class="door-btn not-home" onclick="logDoor('notHome')">
-                    <span class="icon">🏠</span>
-                    NOT HOME
+                <button class="pin-btn not-home" onclick="dropPin('not-home')">
+                    <span>🏠</span>
+                    <span class="label">Not Home</span>
                 </button>
-            </div>
-            <div class="secondary-actions">
-                <button class="sec-btn" onclick="logDoor('noAnswer')">
-                    <span class="icon">🚪</span>
-                    No Answer
+                <button class="pin-btn no-interest" onclick="dropPin('no-interest')">
+                    <span>✋</span>
+                    <span class="label">No Int</span>
                 </button>
-                <button class="sec-btn no-interest" onclick="logDoor('noInterest')">
-                    <span class="icon">✋</span>
-                    No Interest
+                <button class="pin-btn not-qualified" onclick="dropPin('not-qualified')">
+                    <span>❌</span>
+                    <span class="label">Not Qual</span>
                 </button>
-                <button class="sec-btn" onclick="logDoor('other')">
-                    <span class="icon">📝</span>
-                    Other
-                </button>
-                <button class="sec-btn dnc" onclick="logDoor('dnc')">
-                    <span class="icon">🚫</span>
-                    DNC
+                <button class="pin-btn dnc" onclick="dropPin('dnc')">
+                    <span>🚫</span>
+                    <span class="label">DNC</span>
                 </button>
             </div>
         </section>
-
-        <!-- Bottom Nav -->
-        <nav class="bottom-nav">
-            <button class="nav-btn active" id="navMap" onclick="showPanel('map')">
-                <span class="icon">🗺️</span>
-                Map
-            </button>
-            <button class="nav-btn" id="navRoutes" onclick="showPanel('routes')">
-                <span class="icon">📍</span>
-                Routes
-            </button>
-            <button class="nav-btn" id="navCallbacks" onclick="showPanel('callbacks')">
-                <span class="icon">📞</span>
-                Callbacks
-            </button>
-            <button class="nav-btn" id="navStats" onclick="showPanel('stats')">
-                <span class="icon">📊</span>
-                Stats
-            </button>
-        </nav>
     </div>
 
     <!-- Callback Modal -->
     <div class="modal" id="callbackModal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">Log Callback</div>
-                <button class="modal-close" onclick="closeModal('callbackModal')">×</button>
+                <div class="modal-title">📞 Save Callback</div>
+                <button class="modal-close" onclick="closeModal()">×</button>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Name</label>
-                    <input type="text" class="form-input" id="cbName" placeholder="Homeowner name">
+                    <input type="text" class="form-input" id="cbName" placeholder="Homeowner">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Phone</label>
-                    <input type="tel" class="form-input" id="cbPhone" placeholder="(555) 555-5555">
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Address</label>
-                <input type="text" class="form-input" id="cbAddress" placeholder="123 Main St">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Housing Type (for kWh estimate)</label>
-                <div class="housing-types">
-                    <button class="housing-btn" data-type="mhp" onclick="selectHousing(this)">
-                        <span class="icon">🏠</span>
-                        Mobile Home
-                    </button>
-                    <button class="housing-btn" data-type="sfh" onclick="selectHousing(this)">
-                        <span class="icon">🏡</span>
-                        Single Family
-                    </button>
-                    <button class="housing-btn" data-type="apt" onclick="selectHousing(this)">
-                        <span class="icon">🏢</span>
-                        Apartment
-                    </button>
+                    <input type="tel" class="form-input" id="cbPhone" placeholder="555-555-5555">
                 </div>
             </div>
             <div class="form-group">
                 <label class="form-label">Notes</label>
-                <textarea class="form-input form-textarea" id="cbNotes" placeholder="Best time to call, interests, objections..."></textarea>
+                <input type="text" class="form-input" id="cbNotes" placeholder="Best time, interests...">
             </div>
-            <div class="photo-capture">
-                <button class="photo-btn" id="billPhotoBtn" onclick="capturePhoto('bill')">
-                    <span class="icon">📄</span>
-                    Bill Photo
-                </button>
-                <button class="photo-btn" id="homePhotoBtn" onclick="capturePhoto('home')">
-                    <span class="icon">🏠</span>
-                    Home Photo
-                </button>
-            </div>
-            <button class="submit-btn" onclick="saveCallback()">Save Callback</button>
-        </div>
-    </div>
-
-    <!-- Routes Modal -->
-    <div class="modal" id="routesModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Select Route</div>
-                <button class="modal-close" onclick="closeModal('routesModal')">×</button>
-            </div>
-            <div class="routes-list" id="routesList"></div>
-        </div>
-    </div>
-
-    <!-- Callbacks Modal -->
-    <div class="modal" id="callbacksModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Today's Callbacks (<span id="callbackCount">0</span>)</div>
-                <button class="modal-close" onclick="closeModal('callbacksModal')">×</button>
-            </div>
-            <div class="callbacks-list" id="callbacksList"></div>
-        </div>
-    </div>
-
-    <!-- Stats Modal -->
-    <div class="modal" id="statsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Today's Stats</div>
-                <button class="modal-close" onclick="closeModal('statsModal')">×</button>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-card highlight">
-                    <div class="stat-card-value" id="statDeals">0</div>
-                    <div class="stat-card-label">DEALS CLOSED</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-value" id="statDoors">0</div>
-                    <div class="stat-card-label">DOORS KNOCKED</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-value" id="statCallbacks">0</div>
-                    <div class="stat-card-label">CALLBACKS</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-value" id="statNotHome">0</div>
-                    <div class="stat-card-label">NOT HOME</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-value" id="statNoInterest">0</div>
-                    <div class="stat-card-label">NO INTEREST</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-value" id="statRate">0%</div>
-                    <div class="stat-card-label">CLOSE RATE</div>
-                </div>
-            </div>
-            <div class="leaderboard">
-                <div class="leaderboard-title">TEAM LEADERBOARD</div>
-                <div class="leaderboard-item">
-                    <div class="leaderboard-rank gold">1</div>
-                    <div class="leaderboard-name">Marcus T.</div>
-                    <div class="leaderboard-score">4 deals</div>
-                </div>
-                <div class="leaderboard-item">
-                    <div class="leaderboard-rank silver">2</div>
-                    <div class="leaderboard-name">You</div>
-                    <div class="leaderboard-score" id="yourScore">0 deals</div>
-                </div>
-                <div class="leaderboard-item">
-                    <div class="leaderboard-rank bronze">3</div>
-                    <div class="leaderboard-name">Ashley R.</div>
-                    <div class="leaderboard-score">1 deal</div>
-                </div>
-            </div>
+            <button class="submit-btn" onclick="saveCallback()">Save Callback & Drop Pin</button>
         </div>
     </div>
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
-    <!-- Hidden file inputs -->
-    <input type="file" accept="image/*" capture="environment" class="hidden" id="billInput" onchange="handlePhoto('bill', this)">
-    <input type="file" accept="image/*" capture="environment" class="hidden" id="homeInput" onchange="handlePhoto('home', this)">
-
     <script>
         // ========================================
         // STATE
         // ========================================
-        const DAILY_GOAL = 150;
-        let stats = {
-            deals: 0,
-            callbacks: 0,
-            notHome: 0,
-            noAnswer: 0,
-            noInterest: 0,
-            other: 0,
-            dnc: 0
-        };
-        let callbacks = [];
-        let allRoutes = [];
-        let selectedRoute = null;
-        let selectedHousing = null;
-        let gpsTracking = false;
+        let pins = [];
+        let stats = { deal: 0, callback: 0, 'not-home': 0, 'no-interest': 0, 'not-qualified': 0, dnc: 0 };
+        let currentLocation = null;
         let userMarker = null;
-        let photoData = { bill: null, home: null };
 
         // ========================================
         // MAP SETUP
         // ========================================
-        const map = L.map('map', {
-            zoomControl: false
-        }).setView([37.5, -77.5], 10);
+        const map = L.map('map', { zoomControl: false }).setView([37.5, -77.5], 15);
 
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            maxZoom: 19
+            maxZoom: 20
         }).addTo(map);
 
-        // Load LMI zones
+        // Load LMI zones as background
         fetch('lmi_auto_qualify_zones.geojson')
             .then(r => r.json())
             .then(data => {
                 L.geoJSON(data, {
-                    style: { fillColor: '#00bfff', fillOpacity: 0.25, color: '#00ffff', weight: 2 },
-                    onEachFeature: (f, layer) => {
-                        layer.on('click', () => showZoneIntel(f.properties));
-                    }
+                    style: { fillColor: '#00bfff', fillOpacity: 0.15, color: '#00ffff', weight: 1 }
                 }).addTo(map);
             }).catch(() => {});
 
-        // Load routes
-        fetch('routes_lite.geojson')
-            .then(r => r.json())
-            .then(data => {
-                allRoutes = data.features.map(f => ({
-                    id: f.properties.id,
-                    location: f.properties.loc,
-                    score: f.properties.sc || 70,
-                    lmi: f.properties.lm || 70,
-                    hh: f.properties.hh || 100,
-                    fresh: f.properties.fr || 50,
-                    eheat: f.properties.eh || 40,
-                    center: f.properties.ct,
-                    geometry: f.geometry
-                }));
-                renderRoutesList();
+        // Update address on map move
+        map.on('moveend', updateAddress);
+        map.on('move', updateAddress);
 
-                // Add route polygons to map
-                data.features.forEach(f => {
-                    const score = f.properties.sc || 70;
-                    const color = score > 75 ? '#00ff88' : score > 50 ? '#ffd93d' : '#ff6b6b';
-                    L.geoJSON(f, {
-                        style: { fillColor: color, fillOpacity: 0.35, color: color, weight: 2 }
-                    }).addTo(map).on('click', () => {
-                        const route = allRoutes.find(r => r.id === f.properties.id);
-                        if (route) selectRoute(route);
-                    });
-                });
-            }).catch(() => {});
-
-        // ========================================
-        // DOOR LOGGING
-        // ========================================
-        function logDoor(type) {
-            stats[type]++;
-            updateDisplay();
-            saveStats();
-
-            // Haptic feedback
-            if (navigator.vibrate) {
-                navigator.vibrate(type === 'deal' ? [50, 30, 50, 30, 100] : 30);
-            }
-
-            // Show toast
-            const messages = {
-                deal: '🎉 DEAL CLOSED!',
-                callback: '📞 Callback saved',
-                notHome: '🏠 Not home logged',
-                noAnswer: '🚪 No answer',
-                noInterest: '✋ No interest',
-                other: '📝 Logged',
-                dnc: '🚫 DNC marked'
-            };
-            showToast(messages[type] || 'Logged', type === 'deal' ? 'deal' : type === 'dnc' ? 'warning' : 'success');
-        }
-
-        function updateDisplay() {
-            const totalDoors = Object.values(stats).reduce((a, b) => a + b, 0);
-            const closeRate = totalDoors > 0 ? Math.round(stats.deals / totalDoors * 100) : 0;
-            const progress = Math.min(100, (totalDoors / DAILY_GOAL) * 100);
-
-            document.getElementById('doorCount').textContent = totalDoors;
-            document.getElementById('dealsCount').textContent = stats.deals;
-            document.getElementById('closeRate').textContent = closeRate + '%';
-            document.getElementById('doorProgress').style.width = progress + '%';
-
-            // Stats modal
-            document.getElementById('statDeals').textContent = stats.deals;
-            document.getElementById('statDoors').textContent = totalDoors;
-            document.getElementById('statCallbacks').textContent = stats.callbacks;
-            document.getElementById('statNotHome').textContent = stats.notHome;
-            document.getElementById('statNoInterest').textContent = stats.noInterest;
-            document.getElementById('statRate').textContent = closeRate + '%';
-            document.getElementById('yourScore').textContent = stats.deals + ' deals';
-        }
-
-        // ========================================
-        // CALLBACKS
-        // ========================================
-        function openCallbackModal() {
-            document.getElementById('callbackModal').classList.add('active');
-            navigator.geolocation?.getCurrentPosition(pos => {
-                // Could auto-fill address based on location
-            });
-        }
-
-        function selectHousing(btn) {
-            document.querySelectorAll('.housing-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedHousing = btn.dataset.type;
-        }
-
-        function capturePhoto(type) {
-            document.getElementById(type + 'Input').click();
-        }
-
-        function handlePhoto(type, input) {
-            if (input.files && input.files[0]) {
-                photoData[type] = input.files[0];
-                document.getElementById(type + 'PhotoBtn').classList.add('has-photo');
-                document.getElementById(type + 'PhotoBtn').querySelector('.icon').textContent = '✓';
-            }
-        }
-
-        function saveCallback() {
-            const callback = {
-                id: Date.now(),
-                name: document.getElementById('cbName').value || 'Unknown',
-                phone: document.getElementById('cbPhone').value,
-                address: document.getElementById('cbAddress').value,
-                housing: selectedHousing,
-                notes: document.getElementById('cbNotes').value,
-                hasBillPhoto: !!photoData.bill,
-                hasHomePhoto: !!photoData.home,
-                timestamp: new Date().toISOString(),
-                location: null
-            };
-
-            // Get current location
-            navigator.geolocation?.getCurrentPosition(pos => {
-                callback.location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-            });
-
-            callbacks.push(callback);
-            stats.callbacks++;
-            saveStats();
-            saveCallbacks();
-            updateDisplay();
-            renderCallbacksList();
-            closeModal('callbackModal');
-            showToast('📞 Callback saved!', 'success');
-
-            // Reset form
-            document.getElementById('cbName').value = '';
-            document.getElementById('cbPhone').value = '';
-            document.getElementById('cbAddress').value = '';
-            document.getElementById('cbNotes').value = '';
-            document.querySelectorAll('.housing-btn').forEach(b => b.classList.remove('selected'));
-            document.querySelectorAll('.photo-btn').forEach(b => {
-                b.classList.remove('has-photo');
-                b.querySelector('.icon').textContent = b.id === 'billPhotoBtn' ? '📄' : '🏠';
-            });
-            selectedHousing = null;
-            photoData = { bill: null, home: null };
-        }
-
-        function renderCallbacksList() {
-            const container = document.getElementById('callbacksList');
-            document.getElementById('callbackCount').textContent = callbacks.length;
-
-            if (callbacks.length === 0) {
-                container.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem;">No callbacks yet today</div>';
-                return;
-            }
-
-            container.innerHTML = callbacks.map(cb => `
-                <div class="callback-item">
-                    <div class="callback-info">
-                        <div class="callback-name">${cb.name}</div>
-                        <div class="callback-notes">${cb.address || 'No address'} ${cb.notes ? '• ' + cb.notes.substring(0, 30) + '...' : ''}</div>
-                    </div>
-                    <div class="callback-actions">
-                        ${cb.phone ? `<button class="callback-btn call" onclick="callNumber('${cb.phone}')">📞</button>` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function callNumber(phone) {
-            window.location.href = 'tel:' + phone.replace(/\D/g, '');
-        }
-
-
-        // ========================================
-        // ROUTES
-        // ========================================
-        function renderRoutesList() {
-            const container = document.getElementById('routesList');
-            container.innerHTML = allRoutes.slice(0, 50).map(r => {
-                const scoreClass = r.score > 75 ? '' : r.score > 50 ? 'medium' : 'low';
-                return `
-                    <div class="route-item ${selectedRoute?.id === r.id ? 'selected' : ''}" onclick="selectRoute(allRoutes.find(x => x.id === '${r.id}'))">
-                        <div class="route-item-score ${scoreClass}">${r.score}</div>
-                        <div class="route-item-info">
-                            <div class="route-item-name">${r.id}</div>
-                            <div class="route-item-meta">${r.location} • ${r.hh} homes</div>
-                            <div class="route-item-badges">
-                                <span class="zone-badge lmi">LMI ${r.lmi}%</span>
-                                ${r.lmi > 70 ? '<span class="zone-badge auto-qualify">AUTO-QUALIFY</span>' : ''}
-                                ${r.fresh > 80 ? '<span class="zone-badge fresh">FRESH</span>' : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function selectRoute(route) {
-            selectedRoute = route;
-            closeModal('routesModal');
-
-            // Show zone intel
-            showZoneIntel({
-                zone_id: route.id,
-                location: route.location,
-                score: route.score,
-                lmi: route.lmi,
-                hh: route.hh,
-                fresh: route.fresh,
-                eheat: route.eheat
-            });
-
-            // Pan to route
-            if (route.center) {
-                map.setView(route.center, 14);
-            }
-
-            renderRoutesList();
-        }
-
-        function showZoneIntel(props) {
-            const intel = document.getElementById('zoneIntel');
-            intel.classList.add('active');
-
-            document.getElementById('zoneName').textContent = props.location || props.zone_id || 'Zone';
-
-            const score = props.score || 70;
-            const scoreEl = document.getElementById('zoneScore');
-            scoreEl.textContent = score;
-            scoreEl.className = 'zone-score' + (score > 75 ? '' : score > 50 ? ' medium' : ' low');
-
-            // Build badges
-            const lmi = props.lmi || props.avg_pct_low_income * 100 || 50;
-            let badges = `<span class="zone-badge lmi">LMI ${Math.round(lmi)}%</span>`;
-            if (lmi > 70) badges += '<span class="zone-badge auto-qualify">AUTO-QUALIFY</span>';
-            if (props.fresh > 80) badges += '<span class="zone-badge fresh">FRESH ZONE</span>';
-            if (props.eheat > 60) badges += '<span class="zone-badge electric">HIGH BILLS</span>';
-            document.getElementById('zoneBadges').innerHTML = badges;
-
-            // Smart pitch line
-            let pitch = '"You already qualify for the $6,000 federal rebate"';
-            if (lmi > 70) pitch = '"Great news - you automatically qualify for the full $6,000!"';
-            else if (props.eheat > 60) pitch = '"I can cut your electric bill in half - can I see a recent bill?"';
-            else if (props.fresh > 80) pitch = '"We\'re just introducing solar savings to this neighborhood"';
-            document.getElementById('pitchLine').textContent = pitch;
+        function updateAddress() {
+            const center = map.getCenter();
+            document.getElementById('addressText').textContent =
+                `${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}`;
+            document.getElementById('addressMeta').textContent =
+                `Zoom: ${map.getZoom()} • ${pins.length} pins dropped`;
         }
 
         // ========================================
         // GPS
         // ========================================
-        function toggleGPS() {
-            gpsTracking = !gpsTracking;
+        function centerOnMe() {
             const btn = document.getElementById('gpsBtn');
+            btn.classList.add('active');
 
-            if (gpsTracking) {
-                btn.classList.add('tracking');
-                navigator.geolocation.watchPosition(
-                    pos => {
-                        const loc = [pos.coords.latitude, pos.coords.longitude];
-                        if (userMarker) {
-                            userMarker.setLatLng(loc);
-                        } else {
-                            userMarker = L.circleMarker(loc, {
-                                radius: 8,
-                                fillColor: '#00d4ff',
-                                fillOpacity: 1,
-                                color: 'white',
-                                weight: 3
-                            }).addTo(map);
-                        }
-                        map.setView(loc, 16);
-                    },
-                    () => showToast('Location error', 'warning'),
-                    { enableHighAccuracy: true }
-                );
-            } else {
-                btn.classList.remove('tracking');
-                if (userMarker) {
-                    map.removeLayer(userMarker);
-                    userMarker = null;
-                }
-            }
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    const loc = [pos.coords.latitude, pos.coords.longitude];
+                    currentLocation = loc;
+                    map.setView(loc, 18);
+
+                    if (userMarker) map.removeLayer(userMarker);
+                    userMarker = L.circleMarker(loc, {
+                        radius: 8,
+                        fillColor: '#00d4ff',
+                        fillOpacity: 1,
+                        color: 'white',
+                        weight: 3
+                    }).addTo(map).bindPopup('You are here');
+
+                    btn.classList.remove('active');
+                },
+                () => {
+                    showToast('Location error', '');
+                    btn.classList.remove('active');
+                },
+                { enableHighAccuracy: true }
+            );
         }
 
         // ========================================
-        // PANELS & MODALS
+        // PIN DROPPING
         // ========================================
-        function showPanel(panel) {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('nav' + panel.charAt(0).toUpperCase() + panel.slice(1)).classList.add('active');
+        function dropPin(type, callbackData = null) {
+            const center = map.getCenter();
+            const pin = {
+                id: Date.now(),
+                type: type,
+                lat: center.lat,
+                lng: center.lng,
+                timestamp: new Date().toISOString(),
+                callback: callbackData
+            };
 
-            if (panel === 'routes') {
-                document.getElementById('routesModal').classList.add('active');
-            } else if (panel === 'callbacks') {
-                renderCallbacksList();
-                document.getElementById('callbacksModal').classList.add('active');
-            } else if (panel === 'stats') {
-                document.getElementById('statsModal').classList.add('active');
+            pins.push(pin);
+            stats[type]++;
+
+            // Add marker to map
+            const icons = {
+                'deal': '💰',
+                'callback': '📞',
+                'not-home': '🏠',
+                'no-interest': '✋',
+                'not-qualified': '❌',
+                'dnc': '🚫'
+            };
+
+            const colors = {
+                'deal': '#00ff88',
+                'callback': '#ffd93d',
+                'not-home': '#555555',
+                'no-interest': '#ff6b6b',
+                'not-qualified': '#8B4513',
+                'dnc': '#1a1a1a'
+            };
+
+            const marker = L.divIcon({
+                className: 'pin-marker-wrapper',
+                html: `<div class="pin-marker ${type}" style="background:${colors[type]}">${icons[type]}</div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+
+            L.marker([pin.lat, pin.lng], { icon: marker })
+                .addTo(map)
+                .bindPopup(`<b>${type.toUpperCase()}</b><br>${new Date().toLocaleTimeString()}`);
+
+            // Update display
+            updateDisplay();
+            saveData();
+
+            // Feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(type === 'deal' ? [50, 30, 50, 30, 100] : 40);
             }
+
+            const messages = {
+                'deal': '💰 DEAL!',
+                'callback': '📞 Callback saved',
+                'not-home': '🏠 Not home',
+                'no-interest': '✋ No interest',
+                'not-qualified': '❌ Not qualified',
+                'dnc': '🚫 DNC marked'
+            };
+            showToast(messages[type], type);
         }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('navMap').classList.add('active');
+        function updateDisplay() {
+            const total = Object.values(stats).reduce((a, b) => a + b, 0);
+            document.getElementById('doorCount').textContent = total;
+            document.getElementById('dealCount').textContent = stats.deal;
+            document.getElementById('callbackCount').textContent = stats.callback;
+            updateAddress();
+        }
+
+        // ========================================
+        // CALLBACKS
+        // ========================================
+        function openCallback() {
+            document.getElementById('callbackModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('callbackModal').classList.remove('active');
+        }
+
+        function saveCallback() {
+            const data = {
+                name: document.getElementById('cbName').value || 'Unknown',
+                phone: document.getElementById('cbPhone').value,
+                notes: document.getElementById('cbNotes').value
+            };
+
+            dropPin('callback', data);
+            closeModal();
+
+            // Clear form
+            document.getElementById('cbName').value = '';
+            document.getElementById('cbPhone').value = '';
+            document.getElementById('cbNotes').value = '';
         }
 
         // ========================================
         // TOAST
         // ========================================
-        function showToast(message, type = 'success') {
+        function showToast(message, type) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.className = 'toast show ' + type;
-            setTimeout(() => toast.classList.remove('show'), 2500);
+            setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
         // ========================================
         // PERSISTENCE
         // ========================================
-        function saveStats() {
-            localStorage.setItem('emg_stats_' + new Date().toDateString(), JSON.stringify(stats));
-        }
-
-        function saveCallbacks() {
-            localStorage.setItem('emg_callbacks_' + new Date().toDateString(), JSON.stringify(callbacks));
+        function saveData() {
+            const today = new Date().toDateString();
+            localStorage.setItem('emg_pins_' + today, JSON.stringify(pins));
+            localStorage.setItem('emg_stats_' + today, JSON.stringify(stats));
         }
 
         function loadData() {
-            const savedStats = localStorage.getItem('emg_stats_' + new Date().toDateString());
-            if (savedStats) stats = JSON.parse(savedStats);
+            const today = new Date().toDateString();
 
-            const savedCallbacks = localStorage.getItem('emg_callbacks_' + new Date().toDateString());
-            if (savedCallbacks) callbacks = JSON.parse(savedCallbacks);
+            const savedPins = localStorage.getItem('emg_pins_' + today);
+            if (savedPins) {
+                pins = JSON.parse(savedPins);
+                // Recreate markers
+                pins.forEach(pin => {
+                    const icons = {
+                        'deal': '💰', 'callback': '📞', 'not-home': '🏠',
+                        'no-interest': '✋', 'not-qualified': '❌', 'dnc': '🚫'
+                    };
+                    const colors = {
+                        'deal': '#00ff88', 'callback': '#ffd93d', 'not-home': '#555555',
+                        'no-interest': '#ff6b6b', 'not-qualified': '#8B4513', 'dnc': '#1a1a1a'
+                    };
+                    const marker = L.divIcon({
+                        className: 'pin-marker-wrapper',
+                        html: `<div class="pin-marker ${pin.type}" style="background:${colors[pin.type]}">${icons[pin.type]}</div>`,
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    });
+                    L.marker([pin.lat, pin.lng], { icon: marker }).addTo(map);
+                });
+            }
+
+            const savedStats = localStorage.getItem('emg_stats_' + today);
+            if (savedStats) {
+                stats = JSON.parse(savedStats);
+            }
 
             updateDisplay();
-            renderCallbacksList();
         }
 
         // Initialize
         loadData();
+        centerOnMe();
     </script>
 </body>
 </html>
