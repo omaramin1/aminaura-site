@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>EMG Market Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg: #0a0a12;
+            --card: #12121f;
+            --accent: #00d4ff;
+            --success: #00ff88;
+            --warning: #ffd93d;
+            --danger: #ff6b6b;
+            --text: #ffffff;
+            --muted: #666680;
+            --payable: #00cc66;
+            --cannot-process: #ff4444;
+            --denied: #ff8800;
+            --chargeback: #cc00cc;
+            --duplicate: #888888;
+            --vipr: #9966ff;
+            --google: #4488ff;
+            --other: #666666;
+        }
+        html, body {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .app { display: flex; flex-direction: column; height: 100%; }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: var(--card);
+            padding: 0.5rem 1rem;
+            padding-top: calc(0.5rem + env(safe-area-inset-top));
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .header-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+        .header-stats {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .header-stat {
+            text-align: center;
+        }
+        .header-stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .header-stat-label {
+            font-size: 0.5rem;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        /* ===== MAP ===== */
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+        #map { width: 100%; height: 100%; }
+
+        /* Center crosshair */
+        .crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            pointer-events: none;
+            font-size: 2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* GPS button */
+        .gps-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gps-btn.active { background: var(--accent); color: var(--bg); }
+
+        /* Layer toggles */
+        .layer-toggles {
+            position: absolute;
+            top: 3.5rem;
+            right: 1rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .layer-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: var(--text);
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .layer-btn.active {
+            border-color: var(--accent);
+            background: rgba(0,212,255,0.2);
+        }
+
+        /* Legend */
+        .legend {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1000;
+            background: rgba(18,18,31,0.95);
+            border-radius: 8px;
+            padding: 0.5rem 0.6rem;
+            font-size: 0.6rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        .legend-title {
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.3rem;
+            font-size: 0.65rem;
+        }
+        .legend-section {
+            margin-bottom: 0.4rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .legend-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .legend-section-title {
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 0.15rem;
+            font-size: 0.55rem;
+            text-transform: uppercase;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-bottom: 0.15rem;
+        }
+        .legend-item:last-child { margin-bottom: 0; }
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.5);
+            flex-shrink: 0;
+        }
+        .legend-count {
+            color: var(--muted);
+            margin-left: auto;
+            font-weight: 600;
+        }
+        .legend-toggle {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 0.55rem;
+            cursor: pointer;
+            padding: 0.15rem 0.3rem;
+            border-radius: 4px;
+        }
+        .legend-toggle:hover { background: rgba(255,255,255,0.1); }
+        .legend.collapsed .legend-body { display: none; }
+        .legend.collapsed { padding: 0.3rem 0.5rem; }
+
+        /* Address bar */
+        .address-bar {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            background: rgba(18,18,31,0.95);
+            border-radius: 12px;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .address-text { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.15rem; }
+        .address-meta { font-size: 0.65rem; color: var(--muted); }
+
+        /* ===== PIN BUTTONS ===== */
+        .pin-section {
+            background: var(--card);
+            padding: 0.75rem 1rem;
+            padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .pin-instruction {
+            text-align: center;
+            font-size: 0.65rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+        .pin-buttons {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.4rem;
+        }
+        .pin-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.15rem;
+            transition: transform 0.1s;
+        }
+        .pin-btn:active { transform: scale(0.9); }
+        .pin-btn .label { font-size: 0.45rem; font-weight: 600; text-transform: uppercase; }
+        .pin-btn.deal { background: var(--success); color: var(--bg); }
+        .pin-btn.callback { background: var(--warning); color: var(--bg); }
+        .pin-btn.not-home { background: #555; color: white; }
+        .pin-btn.no-interest { background: var(--danger); color: white; }
+        .pin-btn.not-qualified { background: #8B4513; color: white; }
+        .pin-btn.dnc { background: #1a1a1a; color: var(--danger); border: 2px solid var(--danger); }
+
+        /* ===== CALLBACK MODAL ===== */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 5000;
+            display: none;
+            align-items: flex-end;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--card);
+            width: 100%;
+            border-radius: 20px 20px 0 0;
+            padding: 1.5rem;
+            padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+            animation: slideUp 0.2s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .modal-title { font-size: 1.1rem; font-weight: 700; }
+        .modal-close {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--bg); border: none; color: var(--text);
+            font-size: 1.2rem; cursor: pointer;
+        }
+        .form-group { margin-bottom: 0.75rem; }
+        .form-label { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 0.25rem; }
+        .form-input {
+            width: 100%; padding: 0.6rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px; background: var(--bg);
+            color: var(--text); font-size: 0.9rem;
+        }
+        .form-row { display: flex; gap: 0.5rem; }
+        .form-row .form-group { flex: 1; }
+        .submit-btn {
+            width: 100%; padding: 0.875rem; border: none;
+            border-radius: 10px; background: var(--warning);
+            color: var(--bg); font-size: 0.95rem;
+            font-weight: 700; cursor: pointer; margin-top: 0.5rem;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            top: calc(1rem + env(safe-area-inset-top));
+            left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: var(--card); padding: 0.6rem 1.25rem;
+            border-radius: 25px; font-weight: 600; font-size: 0.9rem;
+            z-index: 9999; transition: transform 0.3s;
+            border: 2px solid var(--success);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.deal { background: var(--success); color: var(--bg); border-color: var(--success); }
+        .toast.callback { background: var(--warning); color: var(--bg); border-color: var(--warning); }
+        .toast.dnc { border-color: var(--danger); }
+
+        /* Pin markers - today's */
+        .pin-marker {
+            width: 26px; height: 26px; border-radius: 50%;
+            border: 3px solid white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+        }
+        .pin-marker.deal { background: var(--success); }
+        .pin-marker.callback { background: var(--warning); }
+        .pin-marker.not-home { background: #555; }
+        .pin-marker.no-interest { background: var(--danger); }
+        .pin-marker.not-qualified { background: #8B4513; }
+        .pin-marker.dnc { background: #1a1a1a; border-color: var(--danger); }
+
+        /* Historical pins - by category */
+        .pin-marker.historical {
+            width: 14px; height: 14px;
+            border: 2px solid rgba(255,255,255,0.6);
+            font-size: 8px; opacity: 0.8;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* Cluster styles */
+        .marker-cluster { background-clip: padding-box; border-radius: 50%; }
+        .marker-cluster div {
+            width: 30px; height: 30px; margin-left: 5px; margin-top: 5px;
+            text-align: center; border-radius: 50%;
+            font-size: 11px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            color: white;
+        }
+        .marker-cluster-small { background: rgba(0, 150, 255, 0.4); }
+        .marker-cluster-small div { background: rgba(0, 150, 255, 0.9); }
+        .marker-cluster-medium { background: rgba(255, 200, 0, 0.4); }
+        .marker-cluster-medium div { background: rgba(255, 180, 0, 0.9); color: #333; }
+        .marker-cluster-large { background: rgba(255, 100, 150, 0.4); }
+        .marker-cluster-large div { background: rgba(240, 80, 120, 0.9); }
+
+        /* Filter bar */
+        .filter-bar {
+            position: absolute;
+            bottom: 5rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            display: none;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+            background: rgba(18,18,31,0.95);
+            border-radius: 10px;
+            padding: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .filter-bar.active { display: flex; }
+        .filter-chip {
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: var(--text);
+            cursor: pointer;
+        }
+        .filter-chip.active {
+            background: rgba(0,212,255,0.2);
+            border-color: var(--accent);
+        }
+        .filter-chip .chip-dot {
+            display: inline-block;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            margin-right: 0.2rem;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">EMG MARKET MAP</div>
+            <div class="header-stats">
+                <div class="header-stat">
+                    <div class="header-stat-value" style="color:var(--payable)" id="payableCount">-</div>
+                    <div class="header-stat-label">Payable</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" style="color:var(--cannot-process)" id="cannotCount">-</div>
+                    <div class="header-stat-label">Can't Proc</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" style="color:var(--vipr)" id="viprCount">-</div>
+                    <div class="header-stat-label">VIPR</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" style="color:var(--accent)" id="totalCount">-</div>
+                    <div class="header-stat-label">Total</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Map -->
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="crosshair">+</div>
+            <button class="gps-btn" id="gpsBtn" onclick="centerOnMe()">GPS</button>
+
+            <!-- Layer toggles -->
+            <div class="layer-toggles">
+                <button class="layer-btn active" id="toggleLmi" onclick="toggleLayer('lmi')" title="LMI Zones">LMI</button>
+                <button class="layer-btn active" id="toggleZones" onclick="toggleLayer('zones')" title="Zone Data">Z</button>
+                <button class="layer-btn" id="toggleFilter" onclick="toggleFilter()" title="Filter Pins">F</button>
+            </div>
+
+            <!-- Legend -->
+            <div class="legend" id="legend">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem">
+                    <span class="legend-title">VA SALES</span>
+                    <button class="legend-toggle" onclick="toggleLegend()">[-]</button>
+                </div>
+                <div class="legend-body">
+                    <div class="legend-section">
+                        <div class="legend-section-title">Arcadia Sales</div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:var(--payable)"></div>
+                            <span>Payable</span>
+                            <span class="legend-count" id="legPayable">-</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:var(--cannot-process)"></div>
+                            <span>Cannot Process</span>
+                            <span class="legend-count" id="legCannot">-</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:var(--denied)"></div>
+                            <span>Denied</span>
+                            <span class="legend-count" id="legDenied">-</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:var(--chargeback)"></div>
+                            <span>Chargeback</span>
+                            <span class="legend-count" id="legChargeback">-</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:var(--duplicate)"></div>
+                            <span>Duplicate</span>
+                            <span class="legend-count" id="legDuplicate">-</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:var(--other)"></div>
+                            <span>Other Status</span>
+                            <span class="legend-count" id="legOther">-</span>
+                        </div>
+                    </div>
+                    <div class="legend-section">
+                        <div class="legend-section-title">Other Sources</div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:var(--vipr)"></div>
+                            <span>VIPR Scraped</span>
+                            <span class="legend-count" id="legVipr">-</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:var(--google)"></div>
+                            <span>Google Maps</span>
+                            <span class="legend-count" id="legGoogle">-</span>
+                        </div>
+                    </div>
+                    <div class="legend-section">
+                        <div class="legend-section-title">Today</div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:var(--success);width:10px;height:10px;border:2px solid white"></div>
+                            <span>Your Pins</span>
+                            <span class="legend-count" id="legToday">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter bar -->
+            <div class="filter-bar" id="filterBar">
+                <div class="filter-chip active" data-filter="all" onclick="setFilter('all')">All</div>
+                <div class="filter-chip active" data-filter="payable" onclick="setFilter('payable')"><span class="chip-dot" style="background:var(--payable)"></span>Payable</div>
+                <div class="filter-chip active" data-filter="cannot" onclick="setFilter('cannot')"><span class="chip-dot" style="background:var(--cannot-process)"></span>Can't Proc</div>
+                <div class="filter-chip active" data-filter="denied" onclick="setFilter('denied')"><span class="chip-dot" style="background:var(--denied)"></span>Denied</div>
+                <div class="filter-chip active" data-filter="chargeback" onclick="setFilter('chargeback')"><span class="chip-dot" style="background:var(--chargeback)"></span>Chargeback</div>
+                <div class="filter-chip active" data-filter="duplicate" onclick="setFilter('duplicate')"><span class="chip-dot" style="background:var(--duplicate)"></span>Dup</div>
+                <div class="filter-chip active" data-filter="vipr" onclick="setFilter('vipr')"><span class="chip-dot" style="background:var(--vipr)"></span>VIPR</div>
+                <div class="filter-chip active" data-filter="google" onclick="setFilter('google')"><span class="chip-dot" style="background:var(--google)"></span>Google</div>
+                <div class="filter-chip active" data-filter="other" onclick="setFilter('other')"><span class="chip-dot" style="background:var(--other)"></span>Other</div>
+            </div>
+
+            <div class="address-bar" id="addressBar">
+                <div class="address-text" id="addressText">Loading market data...</div>
+                <div class="address-meta" id="addressMeta">EMG Field Ops - VA Market Map</div>
+            </div>
+        </div>
+
+        <!-- Pin buttons -->
+        <section class="pin-section">
+            <div class="pin-instruction">DROP PIN AT CROSSHAIR</div>
+            <div class="pin-buttons">
+                <button class="pin-btn deal" onclick="dropPin('deal')">
+                    <span>$</span>
+                    <span class="label">Deal</span>
+                </button>
+                <button class="pin-btn callback" onclick="openCallback()">
+                    <span>CB</span>
+                    <span class="label">Callback</span>
+                </button>
+                <button class="pin-btn not-home" onclick="dropPin('not-home')">
+                    <span>NH</span>
+                    <span class="label">Not Home</span>
+                </button>
+                <button class="pin-btn no-interest" onclick="dropPin('no-interest')">
+                    <span>NI</span>
+                    <span class="label">No Int</span>
+                </button>
+                <button class="pin-btn not-qualified" onclick="dropPin('not-qualified')">
+                    <span>NQ</span>
+                    <span class="label">Not Qual</span>
+                </button>
+                <button class="pin-btn dnc" onclick="dropPin('dnc')">
+                    <span>X</span>
+                    <span class="label">DNC</span>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Callback Modal -->
+    <div class="modal" id="callbackModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Save Callback</div>
+                <button class="modal-close" onclick="closeModal()">x</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="cbName" placeholder="Homeowner">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" class="form-input" id="cbPhone" placeholder="555-555-5555">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <input type="text" class="form-input" id="cbNotes" placeholder="Best time, interests...">
+            </div>
+            <button class="submit-btn" onclick="saveCallback()">Save Callback & Drop Pin</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ========================================
+        // STATE
+        // ========================================
+        let todayPins = [];
+        let stats = { deal: 0, callback: 0, 'not-home': 0, 'no-interest': 0, 'not-qualified': 0, dnc: 0 };
+        let userMarker = null;
+        let allMarkers = [];
+
+        // Category classification based on order_status and source
+        function classifyPin(props) {
+            const source = (props.source || '').toLowerCase();
+            const orderStatus = (props.order_status || '').toLowerCase();
+
+            // Non-Arcadia sources
+            if (source === 'vipr_scraped' || source === 'kml_geocoded') return 'vipr';
+            if (source === 'google_maps') return 'google';
+
+            // Arcadia order statuses
+            if (orderStatus === 'payable' || orderStatus === 'processed' || orderStatus === 'utility connect complete') return 'payable';
+            if (orderStatus === 'cannot process' || orderStatus === 'tpv not complete' || orderStatus === 'incomplete' || orderStatus === 'failed - agent phone number') return 'cannot';
+            if (orderStatus === 'denied') return 'denied';
+            if (orderStatus === 'chargeback') return 'chargeback';
+            if (orderStatus === 'duplicate') return 'duplicate';
+            if (orderStatus === 'sent' || orderStatus === 'in queue' || orderStatus === 'awaiting client update' || orderStatus === 'no capacity (on hold)' || orderStatus === 'compliance review') return 'other';
+
+            // Fallback based on type
+            if (source === 'arcadia') {
+                const type = (props.type || '').toLowerCase();
+                if (type === 'complete') return 'payable';
+                if (type === 'pending') return 'other';
+            }
+
+            return 'other';
+        }
+
+        const categoryColors = {
+            'payable': '#00cc66',
+            'cannot': '#ff4444',
+            'denied': '#ff8800',
+            'chargeback': '#cc00cc',
+            'duplicate': '#888888',
+            'vipr': '#9966ff',
+            'google': '#4488ff',
+            'other': '#666666'
+        };
+
+        const categoryIcons = {
+            'payable': '$',
+            'cannot': 'X',
+            'denied': 'D',
+            'chargeback': 'C',
+            'duplicate': '=',
+            'vipr': 'V',
+            'google': 'G',
+            'other': '?'
+        };
+
+        const todayColors = {
+            'deal': '#00ff88', 'callback': '#ffd93d', 'not-home': '#555555',
+            'no-interest': '#ff6b6b', 'not-qualified': '#8B4513', 'dnc': '#1a1a1a'
+        };
+        const todayIcons = {
+            'deal': '$', 'callback': 'CB', 'not-home': 'NH',
+            'no-interest': 'NI', 'not-qualified': 'NQ', 'dnc': 'X'
+        };
+
+        // ========================================
+        // MAP SETUP
+        // ========================================
+        const map = L.map('map', { zoomControl: false }).setView([37.54, -77.43], 12);
+
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 20
+        }).addTo(map);
+
+        // ========================================
+        // LAYER: LMI Zones
+        // ========================================
+        let lmiLayer = null;
+        fetch('lmi_auto_qualify_zones.geojson')
+            .then(r => r.json())
+            .then(data => {
+                lmiLayer = L.geoJSON(data, {
+                    style: f => {
+                        const pct = f.properties.avg_pct_low_income || 0;
+                        return {
+                            fillColor: pct > 80 ? '#00ff88' : pct > 60 ? '#00bfff' : '#ffd93d',
+                            fillOpacity: 0.15,
+                            color: '#00ffff',
+                            weight: 1
+                        };
+                    },
+                    onEachFeature: (f, layer) => {
+                        const p = f.properties;
+                        layer.bindPopup(`<div style="font-family:system-ui;font-size:13px;">
+                            <b>LMI Zone ${p.zone_id || ''}</b><br>
+                            <span style="color:#00ff88;font-size:16px;font-weight:bold">${Math.round(p.avg_pct_low_income || 0)}% LMI</span><br>
+                            <span style="color:#888">Census blocks: ${p.polygon_count || '?'}</span><br>
+                            <span style="color:#00bfff">Auto-qualifies for community solar</span>
+                        </div>`);
+                    }
+                }).addTo(map);
+            }).catch(() => {});
+
+        // ========================================
+        // LAYER: Zone Data
+        // ========================================
+        let zoneLayer = null;
+        fetch('zone_data.geojson')
+            .then(r => r.json())
+            .then(data => {
+                zoneLayer = L.layerGroup();
+                data.features.forEach(f => {
+                    const p = f.properties;
+                    const lat = f.geometry.coordinates[1];
+                    const lng = f.geometry.coordinates[0];
+                    const kwh = p.daily_kwh || 0;
+                    const size = Math.max(14, Math.min(35, kwh / 2500));
+                    const tierColor = p.tier === 'Tier1' ? '#00ff88' : p.tier === 'Tier2' ? '#ffd93d' : '#ff6b6b';
+
+                    const icon = L.divIcon({
+                        className: '',
+                        html: `<div style="
+                            width:${size}px;height:${size}px;border-radius:50%;
+                            background:${tierColor};opacity:0.45;
+                            border:2px solid white;
+                            display:flex;align-items:center;justify-content:center;
+                            font-size:7px;font-weight:bold;color:#000;
+                        ">${p.rank}</div>`,
+                        iconSize: [size, size],
+                        iconAnchor: [size/2, size/2]
+                    });
+
+                    const popup = `<div style="font-family:system-ui;font-size:13px;">
+                        <b>#${p.rank} ${p.location}</b><br>
+                        <span style="color:${tierColor};font-weight:bold">${p.tier}</span>
+                        - Score: ${p.score}<br>
+                        <b style="color:#ffd93d">${kwh.toLocaleString()} kWh/day</b><br>
+                        ${p.lmi_pct} LMI | ${p.households.toLocaleString()} households
+                    </div>`;
+
+                    L.marker([lat, lng], { icon }).bindPopup(popup).addTo(zoneLayer);
+                });
+                zoneLayer.addTo(map);
+            }).catch(() => {});
+
+        // ========================================
+        // LAYER TOGGLES
+        // ========================================
+        function toggleLayer(name) {
+            const btnId = 'toggle' + name.charAt(0).toUpperCase() + name.slice(1);
+            const btn = document.getElementById(btnId);
+            if (name === 'lmi' && lmiLayer) {
+                if (map.hasLayer(lmiLayer)) { map.removeLayer(lmiLayer); btn.classList.remove('active'); }
+                else { map.addLayer(lmiLayer); btn.classList.add('active'); }
+            }
+            if (name === 'zones' && zoneLayer) {
+                if (map.hasLayer(zoneLayer)) { map.removeLayer(zoneLayer); btn.classList.remove('active'); }
+                else { map.addLayer(zoneLayer); btn.classList.add('active'); }
+            }
+        }
+
+        function toggleFilter() {
+            const bar = document.getElementById('filterBar');
+            const btn = document.getElementById('toggleFilter');
+            bar.classList.toggle('active');
+            btn.classList.toggle('active');
+        }
+
+        function toggleLegend() {
+            const legend = document.getElementById('legend');
+            const btn = legend.querySelector('.legend-toggle');
+            legend.classList.toggle('collapsed');
+            btn.textContent = legend.classList.contains('collapsed') ? '[+]' : '[-]';
+        }
+
+        // ========================================
+        // FILTER SYSTEM
+        // ========================================
+        let activeFilters = new Set(['all','payable','cannot','denied','chargeback','duplicate','vipr','google','other']);
+
+        function setFilter(filter) {
+            if (filter === 'all') {
+                const allActive = activeFilters.has('all');
+                if (allActive) {
+                    activeFilters.clear();
+                } else {
+                    activeFilters = new Set(['all','payable','cannot','denied','chargeback','duplicate','vipr','google','other']);
+                }
+            } else {
+                activeFilters.delete('all');
+                if (activeFilters.has(filter)) {
+                    activeFilters.delete(filter);
+                } else {
+                    activeFilters.add(filter);
+                }
+                // Check if all individual filters are active
+                const allIndividual = ['payable','cannot','denied','chargeback','duplicate','vipr','google','other'];
+                if (allIndividual.every(f => activeFilters.has(f))) {
+                    activeFilters.add('all');
+                }
+            }
+
+            // Update chip visual state
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                const f = chip.dataset.filter;
+                chip.classList.toggle('active', activeFilters.has(f));
+            });
+
+            rebuildMarkers();
+        }
+
+        // ========================================
+        // SALES PINS (clustered)
+        // ========================================
+        let historicalCluster = null;
+        let pinData = [];
+        let categoryCounts = { payable: 0, cannot: 0, denied: 0, chargeback: 0, duplicate: 0, vipr: 0, google: 0, other: 0 };
+
+        function buildPopup(props, category) {
+            const lines = [];
+
+            if (props.address) {
+                lines.push(`<strong>${props.address}</strong>`);
+                lines.push(`${props.city || ''}, VA ${props.zip || ''}`);
+            } else if (props.city) {
+                lines.push(`<strong>${props.city}</strong>`);
+            }
+
+            // Order status with color
+            const color = categoryColors[category];
+            const statusLabel = props.order_status || props.type || category;
+            lines.push(`<span style="color:${color};font-weight:bold;font-size:13px">${statusLabel.toUpperCase()}</span>`);
+
+            // Source
+            const sourceLabel = (props.source || '').replace(/_/g, ' ');
+            if (sourceLabel) lines.push(`<span style="color:#888;font-size:10px">Source: ${sourceLabel}</span>`);
+
+            if (props.rep) lines.push(`Rep: ${props.rep}`);
+            if (props.sale_date) lines.push(`<span style="color:#aaa">Date: ${props.sale_date}</span>`);
+            if (props.dwelling) lines.push(`<span style="color:#bbb">${props.dwelling}</span>`);
+            if (props.lmi_type) lines.push(`<span style="color:#00bfff;font-weight:bold">LMI: ${props.lmi_type}</span>`);
+            if (props.status && props.status !== props.order_status) lines.push(`<span style="color:#888">TPV: ${props.status}</span>`);
+
+            return `<div style="font-family:system-ui;font-size:12px;line-height:1.5">${lines.join('<br>')}</div>`;
+        }
+
+        function createCluster() {
+            return L.markerClusterGroup({
+                maxClusterRadius: 50,
+                disableClusteringAtZoom: 17,
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false,
+                chunkedLoading: true,
+                chunkInterval: 200,
+                chunkDelay: 50,
+                iconCreateFunction: function(cluster) {
+                    const count = cluster.getChildCount();
+                    let size = 'small';
+                    if (count >= 500) size = 'large';
+                    else if (count >= 100) size = 'medium';
+                    return L.divIcon({
+                        html: `<div><span>${count}</span></div>`,
+                        className: `marker-cluster marker-cluster-${size}`,
+                        iconSize: L.point(40, 40)
+                    });
+                }
+            });
+        }
+
+        function rebuildMarkers() {
+            if (historicalCluster) {
+                map.removeLayer(historicalCluster);
+            }
+            historicalCluster = createCluster();
+
+            let shown = 0;
+            pinData.forEach(pin => {
+                if (!activeFilters.has(pin.category)) return;
+
+                const color = categoryColors[pin.category];
+                const iconChar = categoryIcons[pin.category];
+
+                const marker = L.divIcon({
+                    className: 'pin-marker-wrapper',
+                    html: `<div class="pin-marker historical" style="background:${color}">${iconChar}</div>`,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
+                });
+
+                const m = L.marker([pin.lat, pin.lng], { icon: marker })
+                    .bindPopup(buildPopup(pin.props, pin.category));
+                historicalCluster.addLayer(m);
+                shown++;
+            });
+
+            map.addLayer(historicalCluster);
+            updateStatus(shown);
+        }
+
+        function updateStatus(shown) {
+            const total = pinData.length;
+            const center = map.getCenter();
+            document.getElementById('addressText').textContent =
+                `${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}`;
+            document.getElementById('addressMeta').textContent =
+                `Showing ${shown.toLocaleString()} of ${total.toLocaleString()} pins | Today: ${todayPins.length}`;
+        }
+
+        // Load sales data
+        fetch('va_sales_pins.geojson')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || !data.features) return;
+                console.log(`Loading ${data.features.length} VA sales pins...`);
+
+                categoryCounts = { payable: 0, cannot: 0, denied: 0, chargeback: 0, duplicate: 0, vipr: 0, google: 0, other: 0 };
+
+                data.features.forEach(f => {
+                    const props = f.properties || {};
+                    const lat = f.geometry.coordinates[1];
+                    const lng = f.geometry.coordinates[0];
+                    const category = classifyPin(props);
+
+                    categoryCounts[category]++;
+                    pinData.push({ lat, lng, props, category });
+                });
+
+                // Update header counts
+                document.getElementById('payableCount').textContent = categoryCounts.payable.toLocaleString();
+                document.getElementById('cannotCount').textContent = categoryCounts.cannot.toLocaleString();
+                document.getElementById('viprCount').textContent = (categoryCounts.vipr + categoryCounts.google).toLocaleString();
+                document.getElementById('totalCount').textContent = pinData.length.toLocaleString();
+
+                // Update legend counts
+                document.getElementById('legPayable').textContent = categoryCounts.payable.toLocaleString();
+                document.getElementById('legCannot').textContent = categoryCounts.cannot.toLocaleString();
+                document.getElementById('legDenied').textContent = categoryCounts.denied.toLocaleString();
+                document.getElementById('legChargeback').textContent = categoryCounts.chargeback.toLocaleString();
+                document.getElementById('legDuplicate').textContent = categoryCounts.duplicate.toLocaleString();
+                document.getElementById('legOther').textContent = categoryCounts.other.toLocaleString();
+                document.getElementById('legVipr').textContent = categoryCounts.vipr.toLocaleString();
+                document.getElementById('legGoogle').textContent = categoryCounts.google.toLocaleString();
+
+                rebuildMarkers();
+                console.log('Categories:', categoryCounts);
+            })
+            .catch(err => console.log('Error loading pins:', err));
+
+        // Update on map move
+        map.on('moveend', () => {
+            const center = map.getCenter();
+            document.getElementById('addressText').textContent =
+                `${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}`;
+        });
+
+        // ========================================
+        // GPS
+        // ========================================
+        function centerOnMe() {
+            const btn = document.getElementById('gpsBtn');
+            btn.classList.add('active');
+
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    const loc = [pos.coords.latitude, pos.coords.longitude];
+                    map.setView(loc, 18);
+
+                    if (userMarker) map.removeLayer(userMarker);
+                    userMarker = L.circleMarker(loc, {
+                        radius: 8, fillColor: '#00d4ff', fillOpacity: 1,
+                        color: 'white', weight: 3
+                    }).addTo(map).bindPopup('You are here');
+
+                    btn.classList.remove('active');
+                },
+                () => {
+                    showToast('Location error', '');
+                    btn.classList.remove('active');
+                },
+                { enableHighAccuracy: true }
+            );
+        }
+
+        // ========================================
+        // PIN DROPPING
+        // ========================================
+        function dropPin(type, callbackData = null) {
+            const center = map.getCenter();
+            const pin = {
+                id: Date.now(),
+                type: type,
+                lat: center.lat,
+                lng: center.lng,
+                timestamp: new Date().toISOString(),
+                callback: callbackData
+            };
+
+            todayPins.push(pin);
+            stats[type]++;
+
+            const marker = L.divIcon({
+                className: 'pin-marker-wrapper',
+                html: `<div class="pin-marker ${type}" style="background:${todayColors[type]}">${todayIcons[type]}</div>`,
+                iconSize: [26, 26],
+                iconAnchor: [13, 13]
+            });
+
+            L.marker([pin.lat, pin.lng], { icon: marker })
+                .addTo(map)
+                .bindPopup(`<b>${type.toUpperCase()}</b><br>${new Date().toLocaleTimeString()}<br><span style="color:#00ff88">Today</span>`);
+
+            document.getElementById('legToday').textContent = todayPins.length;
+            saveData();
+
+            if (navigator.vibrate) {
+                navigator.vibrate(type === 'deal' ? [50, 30, 50, 30, 100] : 40);
+            }
+
+            const messages = {
+                'deal': 'DEAL!', 'callback': 'Callback saved',
+                'not-home': 'Not home', 'no-interest': 'No interest',
+                'not-qualified': 'Not qualified', 'dnc': 'DNC marked'
+            };
+            showToast(messages[type], type);
+        }
+
+        // ========================================
+        // CALLBACKS
+        // ========================================
+        function openCallback() {
+            document.getElementById('callbackModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('callbackModal').classList.remove('active');
+        }
+
+        function saveCallback() {
+            const data = {
+                name: document.getElementById('cbName').value || 'Unknown',
+                phone: document.getElementById('cbPhone').value,
+                notes: document.getElementById('cbNotes').value
+            };
+            dropPin('callback', data);
+            closeModal();
+            document.getElementById('cbName').value = '';
+            document.getElementById('cbPhone').value = '';
+            document.getElementById('cbNotes').value = '';
+        }
+
+        // ========================================
+        // TOAST
+        // ========================================
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // ========================================
+        // PERSISTENCE
+        // ========================================
+        function saveData() {
+            const today = new Date().toDateString();
+            localStorage.setItem('emg_market_pins_' + today, JSON.stringify(todayPins));
+            localStorage.setItem('emg_market_stats_' + today, JSON.stringify(stats));
+        }
+
+        function loadData() {
+            const today = new Date().toDateString();
+
+            const savedPins = localStorage.getItem('emg_market_pins_' + today);
+            if (savedPins) {
+                todayPins = JSON.parse(savedPins);
+                todayPins.forEach(pin => {
+                    const marker = L.divIcon({
+                        className: 'pin-marker-wrapper',
+                        html: `<div class="pin-marker ${pin.type}" style="background:${todayColors[pin.type]}">${todayIcons[pin.type]}</div>`,
+                        iconSize: [26, 26],
+                        iconAnchor: [13, 13]
+                    });
+                    L.marker([pin.lat, pin.lng], { icon: marker })
+                        .addTo(map)
+                        .bindPopup(`<b>${pin.type.toUpperCase()}</b><br><span style="color:#00ff88">Today</span>`);
+                });
+                document.getElementById('legToday').textContent = todayPins.length;
+            }
+
+            const savedStats = localStorage.getItem('emg_market_stats_' + today);
+            if (savedStats) {
+                stats = JSON.parse(savedStats);
+            }
+        }
+
+        // Initialize
+        loadData();
+        centerOnMe();
+    </script>
+</body>
+</html>
